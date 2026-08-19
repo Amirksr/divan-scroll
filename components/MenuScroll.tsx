@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import Image from 'next/image';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { MENU_ITEMS, MenuItem, CATEGORY_LABELS } from '@/lib/menu-data';
+import { MENU_ITEMS, MenuItem, CATEGORY_LABELS, formatToman } from '@/lib/menu-data';
 import { getHorizontalScrollDistance, PINNED_SCROLL_BREAKPOINT } from '@/lib/scroll-utils';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useIsomorphicLayoutEffect } from '@/hooks/useIsomorphicLayoutEffect';
@@ -82,6 +82,7 @@ export default function MenuScroll({ items = MENU_ITEMS }: MenuScrollProps) {
               />
               <div className="h-scrim" />
               <span className="h-cat">{CATEGORY_LABELS[item.category].fa}</span>
+              <span className="h-price">{formatToman(item.price)}</span>
               <span className="h-label">{item.labelFa}</span>
             </div>
           ))}

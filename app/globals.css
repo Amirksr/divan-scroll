@@ -1,14 +1,21 @@
+/* ---------------------------------------------------------------
+   Design tokens ported directly from DivanCafe's tailwind.config.ts
+   + src/app/globals.css (dark theme values — divan-scroll doesn't
+   have a light/dark toggle yet, so only the dark palette is used).
+--------------------------------------------------------------- */
 :root {
-  --ink: #0e0d0c;
-  --ink-2: #171310;
-  --parchment: #ede6d6;
-  --copper: #b8733a;
-  --gold: #c9a227;
-  --line: rgba(237, 230, 214, 0.14);
+  --ink: #1c1613;       /* == DivanCafe's charcoal / --c-ink (dark) */
+  --ink-2: #241b16;      /* == charcoal.soft / --c-ink-soft (dark) */
+  --line: rgb(58 44 34 / 0.4); /* == charcoal.line / --c-ink-line (dark) */
+  --parchment: #f2e9dd;  /* == bone / --c-parchment (dark) */
+  --copper: #b8622c;     /* == copper.DEFAULT */
+  --copper-bright: #d97f42;
+  --gold: #d4a24c;
+  --sage: #788650;
 
-  --font-display: var(--font-fraunces), serif;
-  --font-fa: var(--font-vazirmatn), sans-serif;
-  --font-body: var(--font-inter), sans-serif;
+  --font-display: var(--font-newsreader), 'Newsreader', serif;
+  --font-fa: var(--font-vazirmatn), 'Vazirmatn', sans-serif;
+  --font-body: var(--font-inter), 'Inter', sans-serif;
 }
 
 * {
@@ -197,6 +204,15 @@ body {
   font-family: var(--font-fa);
   font-weight: 600;
   font-size: 0.95rem;
+}
+
+.h-price {
+  position: absolute;
+  left: 1rem;
+  bottom: 2.4rem;
+  font-family: var(--font-fa);
+  font-size: 0.75rem;
+  color: var(--gold);
 }
 
 .h-viewport--static {

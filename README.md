@@ -22,9 +22,9 @@ npm test          # run the Jest suite
 
 ## Notes on the current state
 
-- Sample menu data (`lib/menu-data.ts`) uses 6 real DivanCafe dish photos as a placeholder dataset — swap in the real ~93-item menu before this becomes a real page.
-- Design tokens live in `app/globals.css` as plain CSS custom properties, matching DivanCafe's existing ink/parchment/copper/gold system. If DivanCafe's tokens change, update both places or extract them to a shared package.
-- Fonts (Fraunces, Vazirmatn, Inter) are loaded via `next/font/google`, so the actual font files are only fetched during `next build`/`next dev` — no font files were downloaded in the environment this scaffold was generated in, so run `npm run build` locally once to confirm the font subsets resolve correctly.
+- **Menu data is real**, pulled directly from DivanCafe's `src/lib/data.ts` — the 20 "brunch" (Persian home-cooking) items, the only category with local photography as of this export. Prices, Farsi/English names and descriptions all match the live DivanCafe menu. The other 67 items (coffee/tea/pastry/cold/breakfast) aren't ported yet since they don't have matching local photos.
+- **Design tokens are real**, ported from DivanCafe's `tailwind.config.ts` + `src/app/globals.css`: `charcoal`/`bone`/`copper`/`gold`/`sage`, dark theme only (DivanCafe also has a light theme + a `.light` class toggle — not implemented here yet). Font is Newsreader (display) + Vazirmatn (Farsi) + Inter (body), matching DivanCafe's actual font stack — loaded via `next/font/google` instead of DivanCafe's `<link>` tag approach, since next/font self-hosts and subsets automatically.
+- **Not yet ported from DivanCafe:** Header, Footer, cart (`CartProvider`), Quick View modal, light/dark theme toggle, i18n routing (`/fa` `/en`), and the other 67 menu items. This repo is intentionally scoped to the hero + menu-scroll cinematic sections only — see the case-study plan for what's next.
 - This repo is intentionally private while it's still a prototype. It'll go public once there's a full case-study narrative to go with it (see the linked case study section in `app/page.tsx`).
 
 ---

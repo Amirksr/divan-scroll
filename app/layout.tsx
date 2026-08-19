@@ -1,12 +1,17 @@
 import type { Metadata } from 'next';
-import { Fraunces, Vazirmatn, Inter } from 'next/font/google';
+import { Newsreader, Vazirmatn, Inter } from 'next/font/google';
 import './globals.css';
 
-const fraunces = Fraunces({
+// DivanCafe itself loads these via a <link> to fonts.googleapis.com rather
+// than next/font (see src/app/[locale]/layout.tsx). We use next/font here
+// instead since it self-hosts + subsets automatically, which is strictly
+// better for a Vercel-deployed Next.js app — same font families, safer
+// loading strategy.
+const newsreader = Newsreader({
   subsets: ['latin'],
-  weight: ['300', '500', '600'],
+  weight: ['400', '500', '600'],
   style: ['normal', 'italic'],
-  variable: '--font-fraunces',
+  variable: '--font-newsreader',
   display: 'swap',
 });
 
@@ -32,7 +37,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${fraunces.variable} ${vazirmatn.variable} ${inter.variable}`}>
+      <body className={`${newsreader.variable} ${vazirmatn.variable} ${inter.variable}`}>
         {children}
       </body>
     </html>
