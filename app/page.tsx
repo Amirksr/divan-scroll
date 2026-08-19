@@ -1,19 +1,18 @@
 import Hero from '@/components/Hero';
+import AboutStory from '@/components/AboutStory';
 import MenuScroll from '@/components/MenuScroll';
 
 export default function Home() {
   return (
-    <main>
+    <>
       <Hero />
+      <AboutStory />
       <MenuScroll />
       <section className="cta">
-        <h3>
-          This is the hero and menu scroll of a larger case study — walking through the design
-          system, the RTL/LTR routing, and the build.
-        </h3>
-        <a href="https://github.com/Amirksr/DivanCafe">View the DivanCafe repo →</a>
-        <footer>DIVAN — cinematic scroll case study · Next.js 14 + GSAP ScrollTrigger</footer>
+        <h3>هیرو، داستان و منوی این کیس‌استادی بزرگ‌تر — سیستم طراحی، دیتای واقعی و ساخت را روایت می‌کند.</h3>
+        <a href="https://github.com/Amirksr/DivanCafe">مشاهده‌ی ریپوی دیوان‌کافه ←</a>
+        <footer>DIVAN — نمونه‌ی اسکرول سینماتیک · Next.js 14 + GSAP ScrollTrigger</footer>
       </section>
-    </main>
+    </>
   );
 }

@@ -38,6 +38,7 @@ body {
 /* Sticky header height compensation, so anchor-nav targets don't land
    hidden underneath it. */
 #hero,
+#about,
 #menu-scroll,
 #footer-contact {
   scroll-margin-top: 5rem;
@@ -143,6 +144,118 @@ body {
   text-transform: uppercase;
   color: rgba(237, 230, 214, 0.4);
   opacity: 0;
+}
+
+/* ---------- About story ---------- */
+.about-story {
+  position: relative;
+  background: var(--ink-2);
+  border-top: 1px solid var(--line);
+}
+
+.about-pin {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 6vw;
+  text-align: center;
+}
+
+.about-title {
+  font-family: var(--font-fa);
+  font-weight: 800;
+  font-size: 2.4rem;
+  max-width: 40rem;
+  margin: 1rem 0 3rem;
+  line-height: 1.4;
+}
+
+.about-paragraphs {
+  position: relative;
+  max-width: 42rem;
+  min-height: 12rem;
+}
+
+.about-paragraph {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  /* Deliberately no `bottom: 0` — unlike inset:0, this lets each stacked
+     paragraph's height stay auto/content-based instead of being force-
+     stretched to the container's min-height, so a longer paragraph (more
+     line-wraps on mobile) doesn't get clipped or overlap the next
+     section. */
+  font-family: var(--font-fa);
+  font-size: 1.15rem;
+  line-height: 2;
+  color: rgb(242 233 221 / 0.85);
+}
+
+.about-paragraphs--static {
+  position: static;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.about-paragraphs--static .about-paragraph {
+  position: static;
+}
+
+.about-values {
+  padding: 6rem 6vw 8rem;
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+.about-values-title {
+  text-align: center;
+  font-size: 0.72rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 3rem;
+}
+
+.about-values-grid {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 768px) {
+  .about-values-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.about-value-card {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1.75rem;
+  text-align: center;
+}
+.about-value-card h3 {
+  font-family: var(--font-fa);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--copper-bright);
+  margin-bottom: 0.6rem;
+}
+.about-value-card p {
+  font-size: 0.9rem;
+  color: rgb(242 233 221 / 0.65);
+  line-height: 1.7;
+}
+
+@media (max-width: 720px) {
+  .about-title {
+    font-size: 1.7rem;
+  }
+  .about-paragraph {
+    font-size: 1rem;
+  }
 }
 
 /* ---------- Menu scroll ---------- */
