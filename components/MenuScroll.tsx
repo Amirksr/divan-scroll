@@ -68,10 +68,11 @@ export default function MenuScroll({ items = MENU_ITEMS }: MenuScrollProps) {
       <div
         ref={viewportRef}
         className={reducedMotion ? 'h-viewport h-viewport--static' : 'h-viewport'}
+        dir="ltr"
       >
         <div ref={trackRef} className="h-track">
           {items.map((item, i) => (
-            <div className="h-card" key={item.id}>
+            <div className="h-card" key={item.id} dir="rtl">
               <Image
                 src={item.image}
                 alt={item.labelEn}
