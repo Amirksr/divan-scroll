@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
+import Image from 'next/image';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import SmokeCanvas from './SmokeCanvas';
@@ -54,19 +55,27 @@ export default function Hero() {
 
   return (
     <section ref={rootRef} className="hero" id="hero">
+      <Image
+        src="/images/hero/exterior.webp"
+        alt=""
+        aria-hidden="true"
+        fill
+        priority
+        sizes="100vw"
+        className="hero-bg-photo"
+      />
+      <div className="hero-bg-scrim" aria-hidden="true" />
       <SmokeCanvas active={!reducedMotion} className="smoke-canvas" />
       <div className="hero-inner">
-        <div className="eyebrow">Case Study — Bilingual by Design</div>
+        <div className="eyebrow">کافه و آشپزخانه — تأسیس ۱۴۰۱</div>
         <div className="title-stack">
           <div className="title-fa">دیوان</div>
           <div className="title-en">DIVAN</div>
         </div>
         <div className="hero-line" />
-        <div className="subline">
-          A café menu that reads right-to-left and left-to-right — without ever feeling translated.
-        </div>
+        <div className="subline">هر فنجان، یک بیت از دفتر روزانه‌ی ماست</div>
       </div>
-      <div className="scroll-cue">Scroll</div>
+      <div className="scroll-cue">اسکرول کنید</div>
     </section>
   );
 }

@@ -1,21 +1,20 @@
 'use client';
 
 import { useRef } from 'react';
+import Link from 'next/link';
 import Image from 'next/image';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { MENU_ITEMS, MenuItem, CATEGORY_LABELS, formatToman } from '@/lib/menu-data';
+import { getFeaturedItems, CATEGORY_LABELS, formatToman } from '@/lib/menu-data';
 import { getHorizontalScrollDistance, PINNED_SCROLL_BREAKPOINT } from '@/lib/scroll-utils';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useIsomorphicLayoutEffect } from '@/hooks/useIsomorphicLayoutEffect';
 
 gsap.registerPlugin(ScrollTrigger);
 
-interface MenuScrollProps {
-  items?: MenuItem[];
-}
+const items = getFeaturedItems();
 
-export default function MenuScroll({ items = MENU_ITEMS }: MenuScrollProps) {
+export default function FeaturedMenu() {
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -62,8 +61,8 @@ export default function MenuScroll({ items = MENU_ITEMS }: MenuScrollProps) {
   return (
     <section ref={sectionRef} className="h-scroll" id="menu-scroll">
       <div className="h-intro">
-        <p className="eyebrow-static">{items.length} items, one system</p>
-        <h2>The full menu, proving the system holds beyond the first three photos.</h2>
+        <p className="eyebrow-static">دفتر کامل</p>
+        <h2>غذاهای برگزیده‌ی منو</h2>
       </div>
       <div
         ref={viewportRef}
@@ -88,6 +87,11 @@ export default function MenuScroll({ items = MENU_ITEMS }: MenuScrollProps) {
             </div>
           ))}
         </div>
+      </div>
+      <div className="h-cta-wrap">
+        <Link href="/menu" className="h-cta focus-ring">
+          مشاهده‌ی کل منو ←
+        </Link>
       </div>
     </section>
   );

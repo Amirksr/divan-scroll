@@ -33,7 +33,7 @@ export function clampProgress(progress: number): number {
 
 /**
  * Below this viewport width, pinned/scrubbed scroll is disabled in favor of
- * native horizontal scroll (see MenuScroll + globals.css's matching
+ * native horizontal scroll (see FeaturedMenu/FullMenuScroll + globals.css's matching
  * `@media (max-width: 900px)` rule — CSS can't import this constant, so if
  * you change it here, update that media query too).
  */
@@ -42,7 +42,7 @@ export const PINNED_SCROLL_BREAKPOINT = 901;
 /**
  * Given a breakpoint width, decides whether the pinned/scrubbed cinematic
  * behavior should be active. Below the breakpoint we fall back to native
- * scroll (see MenuScroll component) because pinning feels broken on touch.
+ * scroll (see FeaturedMenu/FullMenuScroll components) because pinning feels broken on touch.
  */
 export function shouldUsePinnedScroll(
   viewportWidth: number,

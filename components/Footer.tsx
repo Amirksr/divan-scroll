@@ -26,9 +26,9 @@ export default function Footer() {
           <nav aria-label="فوتر">
             <p className="footer-heading">دسترسی سریع</p>
             <ul className="footer-list">
-              <li><a href="#hero" className="focus-ring">خانه</a></li>
-              <li><a href="#about" className="focus-ring">درباره دیوان</a></li>
-              <li><a href="#menu-scroll" className="focus-ring">منو</a></li>
+              <li><a href="/#hero" className="focus-ring">خانه</a></li>
+              <li><a href="/#about" className="focus-ring">درباره دیوان</a></li>
+              <li><a href="/menu" className="focus-ring">منوی کامل</a></li>
             </ul>
           </nav>
 
