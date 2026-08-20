@@ -47,21 +47,26 @@ export default function AboutStory() {
         },
       });
 
-      valueRefs.current.forEach((el, i) => {
-        if (!el) return;
-        gsap.fromTo(
-          el,
-          { opacity: 0, y: 24 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.7,
-            delay: i * 0.1,
-            ease: 'power2.out',
-            scrollTrigger: { trigger: el, start: 'top 85%' },
-          }
-        );
-      });
+      // Individual per-card ScrollTriggers don't work here: all 3 cards
+      // sit in one row on desktop (same CSS grid row = same vertical
+      // scroll position), so they'd all cross "top 85%" in the same
+      // instant and only the ~100ms `delay` offset would separate them —
+      // too subtle to read as "one at a time". ScrollTrigger.batch is the
+      // built-in tool for exactly this: it groups elements that enter
+      // together and lets a single tween's `stagger` sequence them
+      // explicitly, independent of their actual layout position.
+      const cards = valueRefs.current.filter((el): el is HTMLDivElement => el !== null);
+      if (cards.length > 0) {
+        ScrollTrigger.batch(cards, {
+          start: 'top 85%',
+          onEnter: (batch) =>
+            gsap.fromTo(
+              batch,
+              { opacity: 0, y: 24 },
+              { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out', stagger: 0.15 }
+            ),
+        });
+      }
     }, sectionRef);
 
     return () => ctx.revert();
