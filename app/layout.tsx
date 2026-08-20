@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Newsreader, Vazirmatn, Inter } from 'next/font/google';
+import { Newsreader, Vazirmatn, Inter, JetBrains_Mono } from 'next/font/google';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import './globals.css';
@@ -31,6 +31,13 @@ const inter = Inter({
   display: 'swap',
 });
 
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-jetbrains-mono',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
   title: 'Divan — Cinematic Scroll Case Study',
   description: 'A bilingual, scroll-driven case study prototype for DivanCafe.',
@@ -39,7 +46,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fa" dir="rtl">
-      <body className={`${newsreader.variable} ${vazirmatn.variable} ${inter.variable}`}>
+      <body
+        className={`${newsreader.variable} ${vazirmatn.variable} ${inter.variable} ${jetbrainsMono.variable}`}
+      >
         <a href="#main" className="skip-link focus-ring">
           رفتن به محتوای اصلی
         </a>

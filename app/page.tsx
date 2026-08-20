@@ -1,4 +1,5 @@
 import Hero from '@/components/Hero';
+import Stats from '@/components/Stats';
 import AboutStory from '@/components/AboutStory';
 import MenuScroll from '@/components/MenuScroll';
 
@@ -6,6 +7,7 @@ export default function Home() {
   return (
     <>
       <Hero />
+      <Stats />
       <AboutStory />
       <MenuScroll />
       <section className="cta">
