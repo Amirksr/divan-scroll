@@ -33,7 +33,7 @@ export default function AboutStory() {
         scrollTrigger: {
           trigger: sectionRef.current,
           start: 'top top',
-          end: '+=200%',
+          end: '+=120%',
           scrub: 0.5,
           pin: true,
           anticipatePin: 1,
@@ -63,7 +63,7 @@ export default function AboutStory() {
             gsap.fromTo(
               batch,
               { opacity: 0, y: 24 },
-              { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out', stagger: 0.15 }
+              { opacity: 1, y: 0, duration: 0.9, ease: 'power2.out', stagger: 0.3 }
             ),
         });
       }
