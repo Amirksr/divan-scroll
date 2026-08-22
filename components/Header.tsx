@@ -16,7 +16,7 @@ import Logo from './Logo';
  */
 const NAV_LINKS = [
   { href: '/#hero', label: 'خانه' },
-  { href: '/#about', label: 'درباره دیوان' },
+  { href: '/about', label: 'درباره دیوان' },
   { href: '/menu', label: 'منوی کامل' },
 ];
 

@@ -12,6 +12,7 @@ import {
   getCategoryItemCount,
   hasCategoryContent,
 } from '@/lib/categories-data';
+import { categoryIcons } from './icons';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useIsomorphicLayoutEffect } from '@/hooks/useIsomorphicLayoutEffect';
 
@@ -32,7 +33,7 @@ export default function Categories() {
           gsap.fromTo(
             batch,
             { opacity: 0, y: 20 },
-            { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out', stagger: 0.1 }
+            { opacity: 1, y: 0, duration: 0.9, ease: 'power2.out', stagger: 0.25 }
           ),
       });
     }, gridRef);
@@ -50,11 +51,13 @@ export default function Categories() {
         {CATEGORY_META.map((cat) => {
           const count = getCategoryItemCount(cat.slug);
           const available = hasCategoryContent(cat.slug);
+          const Icon = categoryIcons[cat.slug];
           const card = (
             <div
               className={available ? 'category-card' : 'category-card category-card--soon'}
               style={reducedMotion ? undefined : { opacity: 0 }}
             >
+              <Icon aria-hidden="true" className="category-icon" />
               <h3>{cat.name}</h3>
               <p>
                 {available

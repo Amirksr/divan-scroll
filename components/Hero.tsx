@@ -28,6 +28,7 @@ export default function Hero() {
         .to('.title-fa', { opacity: 1, duration: 0.9 }, 0.15)
         .to('.hero-line', { height: '3.2rem', duration: 0.8 }, 0.5)
         .to('.subline', { opacity: 1, y: -4, duration: 0.8 }, 0.7)
+        .to('.hero-description', { opacity: 1, y: -4, duration: 0.8 }, 0.85)
         .to('.scroll-cue', { opacity: 1, duration: 0.6 }, 1.0);
 
       if (!reducedMotion) {
@@ -74,6 +75,10 @@ export default function Hero() {
         </div>
         <div className="hero-line" />
         <div className="subline">هر فنجان، یک بیت از دفتر روزانه‌ی ماست</div>
+        <p className="hero-description">
+          در دیوان، دم‌کردن قهوه را مثل خواندن یک غزل می‌بینیم؛ آهسته، دقیق و با معنا. دانه‌های
+          تازه‌برشته، نان‌های خانگی و فضایی برای نشستن و ماندن.
+        </p>
       </div>
       <div className="scroll-cue">اسکرول کنید</div>
     </section>

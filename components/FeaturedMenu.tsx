@@ -61,8 +61,8 @@ export default function FeaturedMenu() {
   return (
     <section ref={sectionRef} className="h-scroll" id="menu-scroll">
       <div className="h-intro">
-        <p className="eyebrow-static">دفتر کامل</p>
-        <h2>غذاهای برگزیده‌ی منو</h2>
+        <p className="eyebrow-static">برگزیده‌های دفتر</p>
+        <h2>محبوب‌ترین‌ها</h2>
       </div>
       <div
         ref={viewportRef}
