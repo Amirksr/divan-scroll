@@ -6,11 +6,10 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { MENU_ITEMS, formatToman } from '@/lib/menu-data';
 import { CATEGORY_META, getOrderedAvailableCategories, type CategorySlug } from '@/lib/categories-data';
-import { getHorizontalScrollDistance, PINNED_SCROLL_BREAKPOINT } from '@/lib/scroll-utils';
+import { getHorizontalScrollDistance } from '@/lib/scroll-utils';
 import { pickActiveCategory, type CategoryProbe } from '@/lib/category-scroll-utils';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useIsomorphicLayoutEffect } from '@/hooks/useIsomorphicLayoutEffect';
-import ScrollEdgeArrows from './ScrollEdgeArrows';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -32,38 +31,34 @@ export default function FullMenuScroll() {
     availableCategories[0]?.slug
   );
 
-  // Horizontal pinned scroll (desktop) / native scroll-snap fallback
-  // (mobile + reduced motion) — same pattern as FeaturedMenu.
+  // Pinned scroll-to-scrub, at every viewport width (see FeaturedMenu for
+  // the same pattern and rationale) -- native scroll-snap now only kicks
+  // in for prefers-reduced-motion via .h-viewport--static below.
   useIsomorphicLayoutEffect(() => {
     if (!sectionRef.current || !trackRef.current || reducedMotion) return;
 
     const ctx = gsap.context(() => {
-      const mm = gsap.matchMedia();
+      const track = trackRef.current!;
+      const viewportEl = viewportRef.current;
 
-      mm.add(`(min-width: ${PINNED_SCROLL_BREAKPOINT}px)`, () => {
-        const track = trackRef.current!;
-        const viewportEl = viewportRef.current;
+      const getSidePadding = () =>
+        viewportEl ? parseFloat(getComputedStyle(viewportEl).paddingLeft) || 0 : 0;
 
-        const getSidePadding = () =>
-          viewportEl ? parseFloat(getComputedStyle(viewportEl).paddingLeft) || 0 : 0;
+      const getDistance = () =>
+        getHorizontalScrollDistance(track.scrollWidth, window.innerWidth, getSidePadding());
 
-        const getDistance = () =>
-          getHorizontalScrollDistance(track.scrollWidth, window.innerWidth, getSidePadding());
-
-        const tween = gsap.to(track, {
-          x: () => -getDistance(),
-          ease: 'none',
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top top',
-            end: () => '+=' + getDistance(),
-            scrub: 0.5,
-            pin: true,
-            invalidateOnRefresh: true,
-          },
-        });
-
-        return () => tween.kill();
+      gsap.to(track, {
+        x: () => -getDistance(),
+        ease: 'none',
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top top',
+          end: () => '+=' + getDistance(),
+          scrub: 0.5,
+          pin: true,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
       });
     }, sectionRef);
 
@@ -72,10 +67,10 @@ export default function FullMenuScroll() {
 
   // Tab highlighting: watch each category's first-card probe element and
   // pick the leftmost currently-visible one as active. Works the same way
-  // whether the track is being translated by GSAP (desktop pin) or
-  // natively scrolled (mobile/reduced-motion), since in both cases the
-  // probe elements' actual on-screen position is what IntersectionObserver
-  // measures — no need to branch this logic by mode.
+  // whether the track is being translated by GSAP (the normal case now,
+  // at every width) or natively scrolled (reduced-motion only), since in
+  // both cases the probe elements' actual on-screen position is what
+  // IntersectionObserver measures — no need to branch this logic by mode.
   useEffect(() => {
     if (availableCategories.length <= 1) return; // nothing to highlight between
 
@@ -156,7 +151,7 @@ export default function FullMenuScroll() {
                   src={item.image}
                   alt={item.labelFa}
                   fill
-                  sizes="(max-width: 900px) 72vw, 300px"
+                  sizes="(min-width: 1280px) 300px, 26vw"
                   style={{ objectFit: 'cover' }}
                   priority={i < 3}
                 />
@@ -168,7 +163,6 @@ export default function FullMenuScroll() {
             );
           })}
         </div>
-        <ScrollEdgeArrows viewportRef={viewportRef} watch={items.length} />
       </div>
     </section>
   );

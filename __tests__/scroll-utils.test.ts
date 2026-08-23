@@ -1,8 +1,4 @@
-import {
-  getHorizontalScrollDistance,
-  clampProgress,
-  shouldUsePinnedScroll,
-} from '@/lib/scroll-utils';
+import { getHorizontalScrollDistance, clampProgress } from '@/lib/scroll-utils';
 
 describe('getHorizontalScrollDistance', () => {
   it('returns track width minus viewport plus padding when track is wider', () => {
@@ -43,22 +39,5 @@ describe('clampProgress', () => {
 
   it('treats NaN as 0 rather than propagating it into a tween', () => {
     expect(clampProgress(NaN)).toBe(0);
-  });
-});
-
-describe('shouldUsePinnedScroll', () => {
-  it('is true at/above the default breakpoint', () => {
-    expect(shouldUsePinnedScroll(901)).toBe(true);
-    expect(shouldUsePinnedScroll(1440)).toBe(true);
-  });
-
-  it('is false below the default breakpoint (tablet/mobile)', () => {
-    expect(shouldUsePinnedScroll(900)).toBe(false);
-    expect(shouldUsePinnedScroll(375)).toBe(false);
-  });
-
-  it('respects a custom breakpoint', () => {
-    expect(shouldUsePinnedScroll(700, 600)).toBe(true);
-    expect(shouldUsePinnedScroll(500, 600)).toBe(false);
   });
 });

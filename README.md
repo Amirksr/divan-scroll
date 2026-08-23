@@ -76,3 +76,32 @@ Fixed:
 Known, intentionally not fixed in this pass:
 - The mobile nav panel doesn't trap focus (Tab can move past it into page content). For a lightweight disclosure panel (not a modal dialog) this is arguably the *correct* ARIA pattern, not a gap — modal dialogs should trap focus, simple dropdowns generally shouldn't.
 - Category cards dimmed to `opacity: 0.45` for the "coming soon" state may not meet strict WCAG contrast ratios on their own — treated the same as a native disabled form control (commonly exempt), not remediated further here.
+
+## Universal pinned scroll + fluid sizing (this pass)
+
+Per direct feedback, removed the directional scroll-arrow indicators
+entirely (they'd already caused one touch-scroll regression — see git
+history) and reworked how the horizontal card tracks size themselves:
+
+- **Pinned scroll-to-scrub now applies at every viewport width**, not
+  just desktop (`min-width: 901px`) — the `gsap.matchMedia()` gate and
+  the now-unused `PINNED_SCROLL_BREAKPOINT`/`shouldUsePinnedScroll`
+  were removed from `lib/scroll-utils.ts`. Native scroll-snap is only
+  used for `prefers-reduced-motion` now, not as a mobile fallback.
+  **Known risk, flagged honestly**: pinning + a translating track on
+  mobile can interact awkwardly with the browser chrome (address bar)
+  resizing the viewport mid-scroll on some devices — Lenis and
+  `anticipatePin`/`invalidateOnRefresh` mitigate this, but it's worth
+  verifying on a few real phones, not just DevTools device emulation.
+- **Card sizing replaced with a single fluid `clamp()` rule**
+  (`flex: 0 0 clamp(11.5rem, 26vw, 18.75rem)`) instead of the
+  patchwork of fixed breakpoint-specific widths (300px desktop / 220px
+  "landscape tablet" / 72vw mobile) that kept needing new special
+  cases patched in reactively. Card label/price/category font sizes
+  also switched to `clamp()`.
+- **Same fluid approach applied to the other sizes that jumped at a
+  single breakpoint** instead of scaling smoothly: Hero's title-fa/
+  title-en/title-stack height, About's title/paragraph, Categories'
+  icon size and title, the /menu page's h1, and FeaturedMenu's h2 —
+  audited every `@media` block in globals.css for hard font-size jumps
+  and converted the ones that had them.

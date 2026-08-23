@@ -6,10 +6,9 @@ import Image from 'next/image';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { getFeaturedItems, CATEGORY_LABELS, formatToman } from '@/lib/menu-data';
-import { getHorizontalScrollDistance, PINNED_SCROLL_BREAKPOINT } from '@/lib/scroll-utils';
+import { getHorizontalScrollDistance } from '@/lib/scroll-utils';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useIsomorphicLayoutEffect } from '@/hooks/useIsomorphicLayoutEffect';
-import ScrollEdgeArrows from './ScrollEdgeArrows';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -25,34 +24,34 @@ export default function FeaturedMenu() {
     if (!sectionRef.current || !trackRef.current || reducedMotion) return;
 
     const ctx = gsap.context(() => {
-      const mm = gsap.matchMedia();
+      const track = trackRef.current!;
+      const viewportEl = viewportRef.current;
 
-      mm.add(`(min-width: ${PINNED_SCROLL_BREAKPOINT}px)`, () => {
-        const track = trackRef.current!;
-        const viewportEl = viewportRef.current;
+      // Read the real rendered side padding instead of assuming 6vw
+      // resolves to a fixed pixel value (it doesn't, above/below 1600px).
+      const getSidePadding = () =>
+        viewportEl ? parseFloat(getComputedStyle(viewportEl).paddingLeft) || 0 : 0;
 
-        // Read the real rendered side padding instead of assuming 6vw
-        // resolves to a fixed pixel value (it doesn't, above/below 1600px).
-        const getSidePadding = () =>
-          viewportEl ? parseFloat(getComputedStyle(viewportEl).paddingLeft) || 0 : 0;
+      const getDistance = () =>
+        getHorizontalScrollDistance(track.scrollWidth, window.innerWidth, getSidePadding());
 
-        const getDistance = () =>
-          getHorizontalScrollDistance(track.scrollWidth, window.innerWidth, getSidePadding());
-
-        const tween = gsap.to(track, {
-          x: () => -getDistance(),
-          ease: 'none',
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top top',
-            end: () => '+=' + getDistance(),
-            scrub: 0.5,
-            pin: true,
-            invalidateOnRefresh: true,
-          },
-        });
-
-        return () => tween.kill();
+      // Pinned scroll-to-scrub applies at every viewport width now (not
+      // just desktop) -- the fluid clamp()-based card sizing in
+      // globals.css means there's no width where this technique doesn't
+      // fit reasonably, and Lenis (see SmoothScroll.tsx) keeps it smooth
+      // on touch too.
+      gsap.to(track, {
+        x: () => -getDistance(),
+        ease: 'none',
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top top',
+          end: () => '+=' + getDistance(),
+          scrub: 0.5,
+          pin: true,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
       });
     }, sectionRef);
 
@@ -77,7 +76,7 @@ export default function FeaturedMenu() {
                 src={item.image}
                 alt={item.labelFa}
                 fill
-                sizes="(max-width: 900px) 72vw, 300px"
+                sizes="(min-width: 1280px) 300px, 26vw"
                 style={{ objectFit: 'cover' }}
                 priority={i < 3}
               />
@@ -88,7 +87,6 @@ export default function FeaturedMenu() {
             </div>
           ))}
         </div>
-        <ScrollEdgeArrows viewportRef={viewportRef} watch={items.length} />
       </div>
       <div className="h-cta-wrap">
         <Link href="/menu" className="h-cta focus-ring">
