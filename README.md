@@ -63,3 +63,16 @@ npm test
 ```
 
 نکته: دیتای منو فعلاً یه نمونه‌ی ۶تایی‌ست؛ قبل از استفاده‌ی واقعی باید به دیتای کامل منوی دیوان‌کافه وصل بشه.
+
+## Accessibility / responsive review (this pass)
+
+Fixed:
+- **Broken scroll on touch devices**: `ScrollEdgeArrows` was originally clickable `<button>`s with `pointer-events: auto` sitting right at the edges of the scrollable card track. A touch swipe starting on/near one of those buttons got captured by the button instead of scrolling the track. Rewritten as fully decorative, non-interactive `<span>`s with `aria-hidden="true"` and zero pointer-events — they can never intercept input again.
+- **Incorrect ARIA on the /menu category tabs**: they used `role="tablist"`/`role="tab"`/`aria-selected` despite having no keyboard navigation, no roving tabindex, and no `aria-controls`-linked panel — a screen reader user would hear "tab, 1 of 6" and expect interactive tab behavior that isn't there. Changed to a plain list with `aria-current` on the active item, which is the correct attribute for "current item in a set" without implying interactivity.
+- **`aria-disabled` on a non-interactive `<div>`** (Categories' "coming soon" cards) — meaningless outside a widget role; removed. The "به‌زودی" text already communicates it via normal reading order.
+- **English `alt` text on a `lang="fa"` page** — menu card images used `item.labelEn`; screen readers would read an English dish name in a Farsi-language context. Switched to `item.labelFa`.
+- **No mobile navigation at all**: `.site-nav` is `display:none` below 1024px with no fallback that existed before this pass — `/menu` and `/about` were completely unreachable from the header on any phone or tablet (not just a visual gap — a real accessibility dead-end for keyboard/screen-reader users too, since the only way to reach those routes was scrolling all the way to the footer). Added a minimal accessible mobile nav: a toggle button (`aria-expanded`, `aria-controls`, dynamic `aria-label`) opening a dropdown panel, closes on Escape (returning focus to the toggle) or an outside click, focuses the first link on open.
+
+Known, intentionally not fixed in this pass:
+- The mobile nav panel doesn't trap focus (Tab can move past it into page content). For a lightweight disclosure panel (not a modal dialog) this is arguably the *correct* ARIA pattern, not a gap — modal dialogs should trap focus, simple dropdowns generally shouldn't.
+- Category cards dimmed to `opacity: 0.45` for the "coming soon" state may not meet strict WCAG contrast ratios on their own — treated the same as a native disabled form control (commonly exempt), not remediated further here.

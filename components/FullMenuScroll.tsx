@@ -108,16 +108,14 @@ export default function FullMenuScroll() {
 
   return (
     <section ref={sectionRef} className="full-menu">
-      <div className="full-menu-tabs" role="tablist" aria-label="دسته‌بندی منو">
+      <div className="full-menu-tabs" aria-label="در حال نمایش دسته‌ی">
         {CATEGORY_META.map((cat) => {
           const available = availableCategories.some((c) => c.slug === cat.slug);
           const isActive = available && activeCategory === cat.slug;
           return (
             <span
               key={cat.slug}
-              role="tab"
-              aria-selected={isActive}
-              aria-disabled={!available}
+              aria-current={isActive ? 'true' : undefined}
               id={`cat-${cat.slug}`}
               className={
                 'full-menu-tab' +
@@ -126,6 +124,7 @@ export default function FullMenuScroll() {
               }
             >
               {cat.name}
+              {!available && <span className="sr-only"> (به‌زودی)</span>}
             </span>
           );
         })}
@@ -155,7 +154,7 @@ export default function FullMenuScroll() {
               >
                 <Image
                   src={item.image}
-                  alt={item.labelEn}
+                  alt={item.labelFa}
                   fill
                   sizes="(max-width: 900px) 72vw, 300px"
                   style={{ objectFit: 'cover' }}

@@ -10,11 +10,16 @@ interface ScrollEdgeArrowsProps {
 }
 
 /**
- * Two directional indicators (not the native OS scrollbar) showing whether
- * there's more to scroll to in each direction: only "forward" at the very
- * start, only "backward" at the very end, both in the middle. Purely
- * indicative — clicking still works as a normal scroll-into-view shortcut,
- * but the primary interaction remains touch/wheel scroll.
+ * Two directional glyphs showing whether there's more to scroll to in each
+ * direction: only "forward" at the very start, only "backward" at the
+ * very end, both in the middle. Purely decorative -- no click-to-scroll,
+ * no pointer-events, no focusable elements. An earlier version made these
+ * clickable <button>s with pointer-events: auto sitting near the track's
+ * edges; on touch devices, a swipe gesture starting on/near one of those
+ * buttons got captured by the button instead of scrolling the track,
+ * effectively breaking horizontal scroll right where this indicator was
+ * visible. Never repeat that -- this component must never be able to
+ * intercept input meant for the scrollable track underneath it.
  */
 export default function ScrollEdgeArrows({ viewportRef, watch }: ScrollEdgeArrowsProps) {
   const [state, setState] = useState({ canScrollForward: true, canScrollBackward: false });
@@ -37,30 +42,14 @@ export default function ScrollEdgeArrows({ viewportRef, watch }: ScrollEdgeArrow
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewportRef, watch]);
 
-  const scrollBy = (dir: 1 | -1) => {
-    const el = viewportRef.current;
-    if (!el) return;
-    el.scrollBy({ left: dir * el.clientWidth * 0.8, behavior: 'smooth' });
-  };
-
   return (
     <div className="scroll-edge-arrows" aria-hidden="true">
-      <button
-        type="button"
-        className={`scroll-arrow scroll-arrow--back${state.canScrollBackward ? '' : ' scroll-arrow--hidden'}`}
-        onClick={() => scrollBy(-1)}
-        tabIndex={-1}
-      >
+      <span className={`scroll-arrow${state.canScrollBackward ? '' : ' scroll-arrow--hidden'}`}>
         ‹
-      </button>
-      <button
-        type="button"
-        className={`scroll-arrow scroll-arrow--fwd${state.canScrollForward ? '' : ' scroll-arrow--hidden'}`}
-        onClick={() => scrollBy(1)}
-        tabIndex={-1}
-      >
+      </span>
+      <span className={`scroll-arrow${state.canScrollForward ? '' : ' scroll-arrow--hidden'}`}>
         ›
-      </button>
+      </span>
     </div>
   );
 }

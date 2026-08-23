@@ -766,10 +766,16 @@ body {
   }
 }
 
-/* ---------- Scroll edge arrows (replaces native scrollbar) ---------- */
+/* ---------- Scroll edge arrows (replaces native scrollbar; purely
+   decorative -- see the comment in ScrollEdgeArrows.tsx for why these
+   must never have pointer-events or be interactive) ---------- */
 .scroll-edge-arrows {
   position: absolute;
-  inset: 0 6vw 2.5rem;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 2.5rem;
+  z-index: 5;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -783,9 +789,9 @@ body {
   }
 }
 .scroll-arrow {
-  pointer-events: auto;
   width: 2.25rem;
   height: 2.25rem;
+  flex-shrink: 0;
   border-radius: 999px;
   border: 1px solid var(--line);
   background: rgb(28 22 19 / 0.85);
@@ -797,14 +803,10 @@ body {
   align-items: center;
   justify-content: center;
   opacity: 0.9;
-  transition: opacity 0.25s ease, transform 0.15s ease;
-}
-.scroll-arrow:active {
-  transform: scale(0.92);
+  transition: opacity 0.25s ease;
 }
 .scroll-arrow--hidden {
   opacity: 0;
-  pointer-events: none;
 }
 
 .h-cta-wrap {
@@ -907,6 +909,18 @@ body {
   top: 1rem;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .site-header {
   position: sticky;
   top: 0.75rem;
@@ -985,6 +999,85 @@ body {
 .reserve-pill:hover {
   background: var(--copper);
   color: var(--ink);
+}
+
+.site-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.mobile-nav-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: transparent;
+  flex-shrink: 0;
+}
+@media (min-width: 1024px) {
+  .mobile-nav-toggle {
+    display: none;
+  }
+}
+
+.mobile-nav-icon,
+.mobile-nav-icon::before,
+.mobile-nav-icon::after {
+  display: block;
+  width: 1.1rem;
+  height: 1.5px;
+  background: var(--parchment);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.mobile-nav-icon {
+  position: relative;
+}
+.mobile-nav-icon::before,
+.mobile-nav-icon::after {
+  content: '';
+  position: absolute;
+  right: 0;
+}
+.mobile-nav-icon::before {
+  top: -0.4rem;
+}
+.mobile-nav-icon::after {
+  top: 0.4rem;
+}
+.mobile-nav-icon--open {
+  background: transparent;
+}
+.mobile-nav-icon--open::before {
+  top: 0;
+  transform: rotate(45deg);
+}
+.mobile-nav-icon--open::after {
+  top: 0;
+  transform: rotate(-45deg);
+}
+
+.mobile-nav-panel {
+  border-top: 1px solid var(--line);
+  padding: 0.5rem 1.25rem 1rem;
+}
+.mobile-nav-panel nav {
+  display: flex;
+  flex-direction: column;
+}
+.mobile-nav-link {
+  padding: 0.75rem 0.25rem;
+  font-family: var(--font-fa);
+  font-size: 0.95rem;
+  color: rgb(242 233 221 / 0.85);
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
+}
+.mobile-nav-link:last-child {
+  border-bottom: none;
 }
 
 /* ---------- Footer (scoped port of DivanCafe's Footer.tsx) ---------- */

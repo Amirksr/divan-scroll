@@ -75,7 +75,7 @@ export default function FeaturedMenu() {
             <div className="h-card" key={item.id} dir="rtl">
               <Image
                 src={item.image}
-                alt={item.labelEn}
+                alt={item.labelFa}
                 fill
                 sizes="(max-width: 900px) 72vw, 300px"
                 style={{ objectFit: 'cover' }}

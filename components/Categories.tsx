@@ -77,9 +77,7 @@ export default function Categories() {
               {card}
             </Link>
           ) : (
-            <div key={cat.slug} aria-disabled="true">
-              {card}
-            </div>
+            <div key={cat.slug}>{card}</div>
           );
         })}
       </div>
