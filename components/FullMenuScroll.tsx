@@ -10,6 +10,7 @@ import { getHorizontalScrollDistance, PINNED_SCROLL_BREAKPOINT } from '@/lib/scr
 import { pickActiveCategory, type CategoryProbe } from '@/lib/category-scroll-utils';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useIsomorphicLayoutEffect } from '@/hooks/useIsomorphicLayoutEffect';
+import ScrollEdgeArrows from './ScrollEdgeArrows';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -168,6 +169,7 @@ export default function FullMenuScroll() {
             );
           })}
         </div>
+        <ScrollEdgeArrows viewportRef={viewportRef} watch={items.length} />
       </div>
     </section>
   );

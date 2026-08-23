@@ -5,6 +5,7 @@ import Image from 'next/image';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import SmokeCanvas from './SmokeCanvas';
+import { getParagraphOpacity } from '@/lib/story-utils';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useIsomorphicLayoutEffect } from '@/hooks/useIsomorphicLayoutEffect';
 
@@ -45,6 +46,29 @@ export default function Hero() {
           .to('.title-fa', { opacity: 0, filter: 'blur(8px)', y: -24, scale: 0.92, duration: 1 })
           .to('.title-en', { opacity: 1, filter: 'blur(0px)', duration: 1 }, '<0.15')
           .to('.scroll-cue', { opacity: 0, duration: 0.3 }, 0);
+
+        // Landscape phones / small tablets (640-767px): the eyebrow +
+        // title alone already claim most of the short viewport height, so
+        // the subline and description can't both sit statically without
+        // crowding or clipping. Reusing AboutStory's tested crossfade math
+        // here instead of stacking them: subline is fully visible at
+        // scroll-start, description takes over by scroll-end. A second
+        // (non-pinning) ScrollTrigger tracks the exact same range as the
+        // pin above so both animations move in lockstep.
+        const mm = gsap.matchMedia();
+        mm.add('(min-width: 640px) and (max-width: 767.98px)', () => {
+          const crossfadeTrigger = ScrollTrigger.create({
+            trigger: rootRef.current,
+            start: 'top top',
+            end: '+=90%',
+            scrub: 0.6,
+            onUpdate: (self) => {
+              gsap.set('.subline', { opacity: getParagraphOpacity(self.progress, 0, 2) });
+              gsap.set('.hero-description', { opacity: getParagraphOpacity(self.progress, 1, 2) });
+            },
+          });
+          return () => crossfadeTrigger.kill();
+        });
       } else {
         gsap.set('.title-fa', { opacity: 0.4 });
         gsap.set('.title-en', { opacity: 1, filter: 'blur(0px)' });
@@ -74,11 +98,13 @@ export default function Hero() {
           <div className="title-en">DIVAN</div>
         </div>
         <div className="hero-line" />
-        <div className="subline">هر فنجان، یک بیت از دفتر روزانه‌ی ماست</div>
-        <p className="hero-description">
-          در دیوان، دم‌کردن قهوه را مثل خواندن یک غزل می‌بینیم؛ آهسته، دقیق و با معنا. دانه‌های
-          تازه‌برشته، نان‌های خانگی و فضایی برای نشستن و ماندن.
-        </p>
+        <div className="hero-crossfade">
+          <div className="subline">هر فنجان، یک بیت از دفتر روزانه‌ی ماست</div>
+          <p className="hero-description">
+            در دیوان، دم‌کردن قهوه را مثل خواندن یک غزل می‌بینیم؛ آهسته، دقیق و با معنا. دانه‌های
+            تازه‌برشته، نان‌های خانگی و فضایی برای نشستن و ماندن.
+          </p>
+        </div>
       </div>
       <div className="scroll-cue">اسکرول کنید</div>
     </section>

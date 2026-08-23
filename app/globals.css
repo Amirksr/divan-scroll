@@ -149,12 +149,48 @@ body {
   opacity: 0;
 }
 
+.hero-crossfade {
+  max-width: 30rem;
+  margin-inline: auto;
+}
+
 /* Short viewports (landscape phones): the hero's title alone already
-   nearly fills a ~400-500px-tall screen. Hiding this extra paragraph
-   there avoids overflow/clipping against .hero's overflow:hidden. */
-@media (max-height: 700px) {
+   nearly fills a ~400-500px-tall screen. Hide the description paragraph
+   there to avoid overflow/clipping against .hero's overflow:hidden --
+   EXCEPT in the 640-767.98px crossfade range below, where the paragraph
+   never stacks with the subline (only one is ever visible at a time), so
+   it doesn't add extra height and is safe to keep. Written as two
+   explicit width-bounded queries instead of one blanket max-height rule
+   + an override, so the two rules can't fight based on CSS source order. */
+@media (max-height: 700px) and (max-width: 639.98px) {
   .hero-description {
     display: none;
+  }
+}
+@media (max-height: 700px) and (min-width: 768px) {
+  .hero-description {
+    display: none;
+  }
+}
+
+/* Landscape phones / small tablets: crossfade subline <-> description
+   instead of stacking both (see the matching gsap.matchMedia() block in
+   Hero.tsx). Only when motion is allowed -- under reduced-motion both
+   stay in normal static flow so nothing overlaps illegibly. */
+@media (min-width: 640px) and (max-width: 767.98px) and (prefers-reduced-motion: no-preference) {
+  .hero-line {
+    display: none;
+  }
+  .hero-crossfade {
+    position: relative;
+    min-height: 3.6rem;
+  }
+  .hero-crossfade > * {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    margin-top: 0 !important;
   }
 }
 
@@ -222,6 +258,34 @@ body {
   .full-menu-tabs {
     margin: 0 auto;
     max-width: 60rem;
+  }
+}
+/* Below 640px: 6 category pills (5 of them disabled placeholders) don't
+   fit on one line inside the fully-rounded floating pill with side
+   margins -- they wrap to 2 rows, and the pill's own background then
+   covers part of the card row underneath it. Trade the full pill shape
+   for a smaller radius (rounded corners only, not rounded ends) and
+   drop the side margins/padding to reclaim width; as a hard guarantee
+   against ever wrapping to 2 lines regardless of exact device width or
+   font rendering, the row itself also becomes a tiny horizontal
+   mini-scroll instead of wrapping. */
+@media (max-width: 639.98px) {
+  .full-menu-tabs {
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin: 0;
+    padding: 0.65rem 0.85rem;
+    border-radius: 0 0 14px 14px;
+    border-inline: none;
+    border-top: none;
+  }
+  .full-menu-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .full-menu-tab {
+    flex-shrink: 0;
   }
 }
 .full-menu-tab {
@@ -591,6 +655,7 @@ body {
 }
 
 .h-viewport {
+  position: relative;
   padding: 0 6vw 7rem;
 }
 
@@ -648,6 +713,10 @@ body {
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x proximity;
   padding-bottom: 2.5rem;
+  scrollbar-width: none; /* Firefox */
+}
+.h-viewport--static::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Edge — replaced by ScrollEdgeArrows */
 }
 .h-viewport--static .h-track {
   width: max-content;
@@ -663,6 +732,10 @@ body {
     -webkit-overflow-scrolling: touch;
     scroll-snap-type: x proximity;
     padding-bottom: 2.5rem;
+    scrollbar-width: none;
+  }
+  .h-viewport::-webkit-scrollbar {
+    display: none;
   }
   .h-track {
     width: max-content;
@@ -680,6 +753,58 @@ body {
   .h-card {
     flex-basis: 220px;
   }
+}
+
+/* Landscape phones / small tablets: 72vw (tuned for tall/narrow portrait
+   screens) produces an oversized card in this short/wide range -- e.g. at
+   768px wide that's a ~553px-wide card, ~737px tall at aspect-ratio 3/4,
+   taller than the viewport itself on most landscape phones. */
+@media (min-width: 640px) and (max-width: 767.98px) {
+  .h-card,
+  .h-viewport--static .h-card {
+    flex: 0 0 220px;
+  }
+}
+
+/* ---------- Scroll edge arrows (replaces native scrollbar) ---------- */
+.scroll-edge-arrows {
+  position: absolute;
+  inset: 0 6vw 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+}
+@media (min-width: 901px) {
+  /* GSAP pin/scrub drives desktop scroll; there's no native overflow
+     there, so no scrollbar to replace and no arrows needed. */
+  .scroll-edge-arrows {
+    display: none;
+  }
+}
+.scroll-arrow {
+  pointer-events: auto;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgb(28 22 19 / 0.85);
+  backdrop-filter: blur(6px);
+  color: var(--parchment);
+  font-size: 1.3rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.9;
+  transition: opacity 0.25s ease, transform 0.15s ease;
+}
+.scroll-arrow:active {
+  transform: scale(0.92);
+}
+.scroll-arrow--hidden {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .h-cta-wrap {

@@ -9,6 +9,7 @@ import { getFeaturedItems, CATEGORY_LABELS, formatToman } from '@/lib/menu-data'
 import { getHorizontalScrollDistance, PINNED_SCROLL_BREAKPOINT } from '@/lib/scroll-utils';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useIsomorphicLayoutEffect } from '@/hooks/useIsomorphicLayoutEffect';
+import ScrollEdgeArrows from './ScrollEdgeArrows';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -87,6 +88,7 @@ export default function FeaturedMenu() {
             </div>
           ))}
         </div>
+        <ScrollEdgeArrows viewportRef={viewportRef} watch={items.length} />
       </div>
       <div className="h-cta-wrap">
         <Link href="/menu" className="h-cta focus-ring">
