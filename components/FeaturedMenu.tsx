@@ -5,7 +5,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { getFeaturedItems, CATEGORY_LABELS, formatToman } from '@/lib/menu-data';
+import { getFeaturedItems, formatToman } from '@/lib/menu-data';
+import { CATEGORY_META } from '@/lib/categories-data';
 import { getHorizontalScrollDistance } from '@/lib/scroll-utils';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useIsomorphicLayoutEffect } from '@/hooks/useIsomorphicLayoutEffect';
@@ -81,7 +82,7 @@ export default function FeaturedMenu() {
                 priority={i < 3}
               />
               <div className="h-scrim" />
-              <span className="h-cat">{CATEGORY_LABELS[item.category].fa}</span>
+              <span className="h-cat">{CATEGORY_META.find((c) => c.slug === item.category)?.name}</span>
               <span className="h-price">{formatToman(item.price)}</span>
               <span className="h-label">{item.labelFa}</span>
             </div>

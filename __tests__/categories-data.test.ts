@@ -12,31 +12,31 @@ describe('CATEGORY_META', () => {
 });
 
 describe('getCategoryItemCount / hasCategoryContent', () => {
-  it('brunch has exactly 20 items (the only category with local photos)', () => {
+  it('matches the real per-category counts now that 5 of 6 categories have local photos', () => {
     expect(getCategoryItemCount('brunch')).toBe(20);
-    expect(hasCategoryContent('brunch')).toBe(true);
+    expect(getCategoryItemCount('cold')).toBe(11);
+    expect(getCategoryItemCount('tea')).toBe(9);
+    expect(getCategoryItemCount('pastry')).toBe(12);
+    expect(getCategoryItemCount('breakfast')).toBe(3);
+    for (const slug of ['brunch', 'cold', 'tea', 'pastry', 'breakfast'] as const) {
+      expect(hasCategoryContent(slug)).toBe(true);
+    }
   });
 
-  it('categories without local photography currently have 0 items', () => {
-    for (const slug of ['coffee', 'tea', 'breakfast', 'pastry', 'cold'] as const) {
-      expect(getCategoryItemCount(slug)).toBe(0);
-      expect(hasCategoryContent(slug)).toBe(false);
-    }
+  it('coffee still has 0 items (no local photography for it yet)', () => {
+    expect(getCategoryItemCount('coffee')).toBe(0);
+    expect(hasCategoryContent('coffee')).toBe(false);
   });
 });
 
 describe('getOrderedAvailableCategories', () => {
-  it('currently returns only brunch', () => {
+  it('returns the 5 populated categories, not coffee', () => {
     const available = getOrderedAvailableCategories();
-    expect(available).toHaveLength(1);
-    expect(available[0].slug).toBe('brunch');
+    expect(available).toHaveLength(5);
+    expect(available.map((c) => c.slug)).not.toContain('coffee');
   });
 
   it('preserves CATEGORY_META order among available categories', () => {
-    // Sanity check that this doesn't just return an arbitrary order —
-    // once more categories get photos, this test's premise (single result)
-    // will need updating, which is intentional: it documents the current
-    // data limitation rather than silently tolerating it forever.
     const metaOrder = CATEGORY_META.map((c) => c.slug);
     const available = getOrderedAvailableCategories().map((c) => c.slug);
     const filteredMetaOrder = metaOrder.filter((slug) => available.includes(slug));

@@ -105,3 +105,39 @@ history) and reworked how the horizontal card tracks size themselves:
   icon size and title, the /menu page's h1, and FeaturedMenu's h2 —
   audited every `@media` block in globals.css for hard font-size jumps
   and converted the ones that had them.
+
+## Real photography for 5 of 6 categories (this pass)
+
+35 new real dish/drink photos added, matched by name against DivanCafe's
+full `src/lib/data.ts` (all 87 items, not just the brunch subset used
+before) rather than assumed:
+
+- **cold** (11 items), **tea** (9 items), **breakfast** (3 of 3 — fully
+  covered), **pastry** (12 items) now have real local photography,
+  joining **brunch** (20 items, unchanged). Only **coffee** (11 items)
+  still has none.
+- Every filename was cross-referenced against all 87 real item names
+  (not just assumed from the filename) to get the exact real `id`,
+  price, and bilingual name/description — and to catch cross-category
+  name collisions (e.g. "آیس آمریکانو" matches both the hot `americano`
+  *and* the real `iced-americano` id; picked the one matching what the
+  photo actually shows).
+- `lib/menu-data.ts`'s `MenuCategory` type widened from `'brunch'` to
+  `'brunch' | 'cold' | 'tea' | 'breakfast' | 'pastry'` (still excluding
+  `'coffee'`, matching what actually has data now).
+- Removed `CATEGORY_LABELS` from `lib/menu-data.ts` — it was a second,
+  drifted set of category display names duplicating
+  `lib/categories-data.ts`'s `CATEGORY_META` (which already had the
+  real names for all 6 categories, including the ones without photos
+  yet, for the "coming soon" UI). `FeaturedMenu.tsx` switched to
+  `CATEGORY_META`, matching what `FullMenuScroll.tsx` already did.
+- **This is the first time the /menu page's category-tab highlighting
+  has real multiple categories to switch between** — it was only
+  possible to unit-test the picking logic in isolation before (see
+  `lib/category-scroll-utils.ts`'s tests), not observe it actually
+  switching live. Worth specifically checking on the deployed site:
+  scrolling through tea -> breakfast -> pastry -> cold -> brunch (that's
+  `CATEGORY_META`'s real order) should visibly move the highlighted tab
+  along with the cards.
+
+68/68 tests passing, tsc clean.

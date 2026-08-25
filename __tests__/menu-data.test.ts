@@ -87,8 +87,8 @@ describe('formatToman', () => {
 });
 
 describe('MENU_ITEMS (real data sanity checks)', () => {
-  it('has exactly 20 items, matching the real photos currently in public/images/menu', () => {
-    expect(MENU_ITEMS).toHaveLength(20);
+  it('has exactly 55 items, matching the real photos currently in public/images/menu (20 brunch + 35 across cold/tea/breakfast/pastry)', () => {
+    expect(MENU_ITEMS).toHaveLength(55);
   });
 
   it('every item has a unique id and slug', () => {
@@ -104,7 +104,7 @@ describe('MENU_ITEMS (real data sanity checks)', () => {
     }
   });
 
-  it('exactly 6 items are featured, matching the hero gallery', () => {
+  it('exactly 6 items are featured, matching the hero gallery (unchanged by the new categories)', () => {
     expect(getFeaturedItems().length).toBe(6);
   });
 });
