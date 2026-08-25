@@ -141,3 +141,36 @@ before) rather than assumed:
   along with the cards.
 
 68/68 tests passing, tsc clean.
+
+## All 6 categories now have real photography (this pass)
+
+Per feedback, went back and checked DivanCafe's real repo for every
+item *not* covered by the 35 uploaded photos, rather than assuming
+those categories were done:
+
+- Extracted every remaining item's `localPhoto` path from DivanCafe's
+  `src/lib/data.ts` and checked (via HTTP, not assumption) whether a
+  real file actually exists at that path in the live repo — 31 of 32
+  remaining items did (only "ترکی" / Turkish coffee has no
+  `localPhoto` defined in DivanCafe's own data at all).
+- Downloaded and verified all 31 (real photos, 480x480, 10-77KB each —
+  not placeholder gradients) and added them with their real
+  name/price/description, same as every other item so far.
+- **Coffee now has real photos too** (10 of 11 items) — this was
+  previously the one category with zero local photography.
+- `MenuCategory` widened one more time to include `'coffee'`.
+- **All 6 real categories are now fully wired**: every category card
+  on the homepage is clickable, every tab on `/menu` is active (none
+  show "coming soon" anymore).
+
+**Known UX consideration, not fixed here — worth deciding on
+purpose**: the `/menu` page's horizontal track now holds 86 items
+(previously 20), meaning the pinned scroll distance is roughly 4x
+longer than before. This wasn't an explicit ask in this pass, so it's
+left as-is, but it's worth checking how it actually feels to scroll
+through on the deployed site — it may be worth splitting into
+per-category pinned sections, adding a "jump to category" shortcut
+beyond the tab highlight, or some other pacing change once you've felt
+it live.
+
+67/67 tests passing, tsc clean.

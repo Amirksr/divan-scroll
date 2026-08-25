@@ -87,8 +87,8 @@ describe('formatToman', () => {
 });
 
 describe('MENU_ITEMS (real data sanity checks)', () => {
-  it('has exactly 55 items, matching the real photos currently in public/images/menu (20 brunch + 35 across cold/tea/breakfast/pastry)', () => {
-    expect(MENU_ITEMS).toHaveLength(55);
+  it('has exactly 86 items, matching the real photos currently in public/images/menu (all 87 real DivanCafe items except "ترکی", which has no localPhoto in DivanCafe\'s own data.ts)', () => {
+    expect(MENU_ITEMS).toHaveLength(86);
   });
 
   it('every item has a unique id and slug', () => {

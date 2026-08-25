@@ -12,34 +12,30 @@ describe('CATEGORY_META', () => {
 });
 
 describe('getCategoryItemCount / hasCategoryContent', () => {
-  it('matches the real per-category counts now that 5 of 6 categories have local photos', () => {
-    expect(getCategoryItemCount('brunch')).toBe(20);
+  it('matches the real per-category counts -- all 6 categories now have local photos', () => {
+    expect(getCategoryItemCount('brunch')).toBe(33);
     expect(getCategoryItemCount('cold')).toBe(11);
-    expect(getCategoryItemCount('tea')).toBe(9);
-    expect(getCategoryItemCount('pastry')).toBe(12);
+    expect(getCategoryItemCount('tea')).toBe(11);
+    expect(getCategoryItemCount('pastry')).toBe(18);
     expect(getCategoryItemCount('breakfast')).toBe(3);
-    for (const slug of ['brunch', 'cold', 'tea', 'pastry', 'breakfast'] as const) {
+    // 10, not the real category's full 11 -- DivanCafe's own data.ts has
+    // no localPhoto path defined for "ترکی" (Turkish coffee).
+    expect(getCategoryItemCount('coffee')).toBe(10);
+    for (const slug of ['brunch', 'cold', 'tea', 'pastry', 'breakfast', 'coffee'] as const) {
       expect(hasCategoryContent(slug)).toBe(true);
     }
-  });
-
-  it('coffee still has 0 items (no local photography for it yet)', () => {
-    expect(getCategoryItemCount('coffee')).toBe(0);
-    expect(hasCategoryContent('coffee')).toBe(false);
   });
 });
 
 describe('getOrderedAvailableCategories', () => {
-  it('returns the 5 populated categories, not coffee', () => {
+  it('returns all 6 categories now that every one has at least one photo', () => {
     const available = getOrderedAvailableCategories();
-    expect(available).toHaveLength(5);
-    expect(available.map((c) => c.slug)).not.toContain('coffee');
+    expect(available).toHaveLength(6);
   });
 
-  it('preserves CATEGORY_META order among available categories', () => {
+  it('preserves CATEGORY_META order', () => {
     const metaOrder = CATEGORY_META.map((c) => c.slug);
     const available = getOrderedAvailableCategories().map((c) => c.slug);
-    const filteredMetaOrder = metaOrder.filter((slug) => available.includes(slug));
-    expect(available).toEqual(filteredMetaOrder);
+    expect(available).toEqual(metaOrder);
   });
 });
