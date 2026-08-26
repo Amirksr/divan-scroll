@@ -174,3 +174,39 @@ beyond the tab highlight, or some other pacing change once you've felt
 it live.
 
 67/67 tests passing, tsc clean.
+
+## Tab bar redesign, click-to-jump, and a GSAP resize fix (this pass)
+
+- **`/menu` tab bar redesigned below 1024px**: was a floating, fully-
+  rounded pill with side margins at every width — once all 6 categories
+  got real (often longer) names instead of short "به‌زودی" placeholders,
+  it didn't have room and wrapped into an ugly 2-row stadium shape that
+  covered part of the card row underneath. Now: a plain bar flush to
+  both viewport edges below 1024px, free to wrap to 2 rows if needed;
+  the floating rounded pill is reserved for ≥1024px, where 6 real
+  category names reliably fit on one line.
+- **Tabs are now real, clickable `<button>`s** that jump the horizontal
+  track to that category (previously purely visual `aria-current`
+  indicators). This didn't lock out free scrolling afterward — clicking
+  just lands you at the same scroll position you'd reach by scrolling
+  there yourself, so the existing IntersectionObserver-driven tab
+  highlighting, mouse-wheel scroll, and everything else keeps working
+  unchanged. Implementation: `.h-track` needed `position: relative` so
+  a card's `offsetLeft` is measured from the track's own edge
+  regardless of GSAP's current x-transform, converted to a scroll
+  progress fraction, then to an absolute page scroll position via the
+  stored `ScrollTrigger` instance's `.start`/`.end`. Actually moves the
+  page via `lib/lenis-instance.ts` (a small shared reference to
+  SmoothScroll's Lenis instance) rather than a raw `window.scrollTo`,
+  which would fight Lenis's own internal scroll state and jank/snap
+  back.
+- **Fixed the pinned-section-vs-footer "runs away and never meets" bug**,
+  most visible in device simulators: added
+  `ScrollTrigger.config({ ignoreMobileResize: true })` globally. This is
+  GSAP's documented fix for exactly this symptom — a resize event
+  (address bar show/hide on mobile, or a simulator's viewport chrome)
+  firing mid-scroll was triggering `invalidateOnRefresh` on the pinned
+  ScrollTrigger while the user was actively scrolled near its end, and
+  each recalculation nudged the target end position further away.
+
+67/67 tests passing, tsc clean.

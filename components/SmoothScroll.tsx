@@ -6,8 +6,20 @@ import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { lenisInstance } from '@/lib/lenis-instance';
 
 gsap.registerPlugin(ScrollTrigger);
+
+// Known GSAP fix for pinned sections seeming to "run away"/oscillate near
+// the end of their scroll range on mobile browsers and device simulators:
+// the address bar (or a simulator's viewport chrome) showing/hiding
+// mid-scroll fires resize events, which by default trigger
+// ScrollTrigger to recalculate every pin's distance -- including ones
+// the user is actively scrolled into. Each recalculation nudges the
+// target end position, so scrolling toward it can feel like it keeps
+// retreating. This tells ScrollTrigger to ignore exactly that class of
+// resize event.
+ScrollTrigger.config({ ignoreMobileResize: true });
 
 /**
  * Mounted once in the root layout. Native browser scroll fires in discrete
@@ -34,6 +46,7 @@ export default function SmoothScroll() {
       easing: (t: number) => 1 - Math.pow(1 - t, 3),
     });
     lenisRef.current = lenis;
+    lenisInstance.current = lenis;
 
     lenis.on('scroll', ScrollTrigger.update);
 
@@ -47,6 +60,7 @@ export default function SmoothScroll() {
       gsap.ticker.remove(tick);
       lenis.destroy();
       lenisRef.current = null;
+      lenisInstance.current = null;
     };
   }, [reducedMotion]);
 
