@@ -30,6 +30,24 @@ ScrollTrigger.config({ ignoreMobileResize: true });
  * instead, so every ScrollTrigger-driven animation (pin, scrub, batch)
  * reads a smooth position from the very first frame.
  *
+ * Touch devices are the exception: `ignoreMobileResize` above only stops
+ * ScrollTrigger from *recalculating* pin distances when the mobile address
+ * bar shows/hides mid-scroll -- it doesn't stop the browser's native
+ * scroll position itself from jumping when that resize happens, and on a
+ * real Galaxy S8+ that jump landed exactly at the pinned menu section's
+ * release point (confirmed: happens on every scroll, address bar visibly
+ * collapsing each time), producing a visible snap-back. GSAP's own
+ * `ScrollTrigger.normalizeScroll(true)` is the documented fix -- it takes
+ * scroll handling onto the JS thread and prevents the address bar from
+ * resizing the viewport mid-scroll at all. It is NOT combined with Lenis
+ * here: both would independently intercept the same touch input, and two
+ * systems fighting for control of scroll is exactly the class of bug that
+ * made things worse when this project's own pin mechanism was changed
+ * for a similar reason. So touch devices get normalizeScroll only, and
+ * fall back to plain native (instant) scroll elsewhere -- click-to-jump
+ * in FullMenuScroll already has a `window.scrollTo` fallback for when no
+ * Lenis instance exists, so nothing else needs to change for that.
+ *
  * Skipped entirely under prefers-reduced-motion: smoothing/inertia is a
  * motion effect, and native instant scroll is what that preference asks for.
  */
@@ -40,6 +58,16 @@ export default function SmoothScroll() {
 
   useEffect(() => {
     if (reducedMotion) return;
+
+    const isTouch =
+      typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+
+    if (isTouch) {
+      const normalizer = ScrollTrigger.normalizeScroll(true);
+      return () => {
+        normalizer?.kill();
+      };
+    }
 
     const lenis = new Lenis({
       duration: 1.1,
