@@ -1,0 +1,1118 @@
+/* ---------------------------------------------------------------
+   Design tokens ported directly from DivanCafe's tailwind.config.ts
+   + src/app/globals.css (dark theme values — divan-scroll doesn't
+   have a light/dark toggle yet, so only the dark palette is used).
+--------------------------------------------------------------- */
+:root {
+  --ink: #1c1613;       /* == DivanCafe's charcoal / --c-ink (dark) */
+  --ink-2: #241b16;      /* == charcoal.soft / --c-ink-soft (dark) */
+  --line: rgb(58 44 34 / 0.4); /* == charcoal.line / --c-ink-line (dark) */
+  --parchment: #f2e9dd;  /* == bone / --c-parchment (dark) */
+  --copper: #b8622c;     /* == copper.DEFAULT */
+  --copper-bright: #d97f42;
+  --gold: #d4a24c;
+  --sage: #788650;
+
+  --font-display: var(--font-newsreader), 'Newsreader', serif;
+  --font-fa: var(--font-vazirmatn), 'Vazirmatn', sans-serif;
+  --font-body: var(--font-inter), 'Inter', sans-serif;
+  --font-mono: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* scroll-behavior intentionally omitted: Lenis (see SmoothScroll.tsx) now
+   owns scroll smoothing site-wide, including anchor-link jumps. Native
+   scroll-behavior:smooth here would double up with Lenis's own easing. */
+
+html {
+  /* Disables the browser's native overscroll "bounce"/rubber-band effect
+     at the very top/bottom of the page. Without this, scrolling past the
+     document's natural end (e.g. arriving at the footer, the last element
+     on every page) can briefly overshoot and spring back -- which reads
+     as content jumping backward right where a pinned section like
+     FullMenuScroll releases into the footer, even though the pin itself
+     isn't doing anything wrong at that point. Independent of the GSAP/
+     Lenis/normalizeScroll setup in SmoothScroll.tsx -- this is purely
+     native browser bounce suppression. */
+  overscroll-behavior-y: none;
+}
+
+body {
+  background: var(--ink);
+  color: var(--parchment);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  overscroll-behavior-y: none;
+}
+
+/* Sticky header height compensation, so anchor-nav targets don't land
+   hidden underneath it. */
+#hero,
+#about,
+#menu-scroll,
+#footer-contact {
+  scroll-margin-top: 5rem;
+}
+
+::selection {
+  background: var(--copper);
+  color: var(--ink);
+}
+
+/* ---------- Hero ---------- */
+.hero {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--ink);
+}
+
+.hero-bg-photo {
+  object-fit: cover;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.hero-bg-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgb(28 22 19 / 0.95) 0%,
+    rgb(28 22 19 / 0.55) 45%,
+    var(--ink) 100%
+  );
+  pointer-events: none;
+}
+
+.smoke-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+
+.eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--copper);
+  margin-bottom: 1.6rem;
+  opacity: 0;
+}
+
+.title-stack {
+  position: relative;
+  height: clamp(6rem, 5rem + 5vw, 9.5rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.title-fa,
+.title-en {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform, opacity, filter;
+}
+
+.title-fa {
+  font-family: var(--font-fa);
+  font-weight: 800;
+  font-size: clamp(3.2rem, 2.11rem + 5.43vw, 7rem);
+  direction: rtl;
+}
+
+.title-en {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-style: normal;
+  font-size: clamp(2.6rem, 1.86rem + 3.71vw, 5.2rem);
+  letter-spacing: 0.01em;
+  opacity: 0;
+  filter: blur(6px);
+}
+
+.hero-description {
+  margin-top: 1.1rem;
+  max-width: 30rem;
+  margin-inline: auto;
+  font-family: var(--font-fa);
+  font-size: 0.92rem;
+  line-height: 1.9;
+  color: rgb(242 233 221 / 0.6);
+  opacity: 0;
+}
+
+.hero-crossfade {
+  max-width: 30rem;
+  margin-inline: auto;
+}
+
+/* Short viewports (landscape phones): the hero's title alone already
+   nearly fills a ~400-500px-tall screen. Hide the description paragraph
+   there to avoid overflow/clipping against .hero's overflow:hidden --
+   EXCEPT in the 640-767.98px crossfade range below, where the paragraph
+   never stacks with the subline (only one is ever visible at a time), so
+   it doesn't add extra height and is safe to keep. Written as two
+   explicit width-bounded queries instead of one blanket max-height rule
+   + an override, so the two rules can't fight based on CSS source order. */
+@media (max-height: 700px) and (max-width: 639.98px) {
+  .hero-description {
+    display: none;
+  }
+}
+@media (max-height: 700px) and (min-width: 768px) {
+  .hero-description {
+    display: none;
+  }
+}
+
+/* Landscape phones / small tablets: crossfade subline <-> description
+   instead of stacking both (see the matching gsap.matchMedia() block in
+   Hero.tsx). Only when motion is allowed -- under reduced-motion both
+   stay in normal static flow so nothing overlaps illegibly. */
+@media (min-width: 640px) and (max-width: 767.98px) and (prefers-reduced-motion: no-preference) {
+  .hero-line {
+    display: none;
+  }
+  .hero-crossfade {
+    position: relative;
+    min-height: 3.6rem;
+  }
+  .hero-crossfade > * {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    margin-top: 0 !important;
+  }
+}
+
+.subline {
+  margin-top: 1.8rem;
+  font-size: 1rem;
+  color: rgba(237, 230, 214, 0.6);
+  opacity: 0;
+}
+
+.hero-line {
+  width: 1px;
+  height: 0;
+  background: linear-gradient(var(--gold), transparent);
+  margin: 2.4rem auto 0;
+}
+
+.scroll-cue {
+  position: absolute;
+  bottom: 2.4rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.68rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(237, 230, 214, 0.4);
+  opacity: 0;
+}
+
+/* ---------- Full menu page ---------- */
+.menu-page-intro {
+  padding: 7rem 6vw 3rem;
+  text-align: center;
+}
+.menu-page-intro h1 {
+  font-family: var(--font-fa);
+  font-weight: 800;
+  font-size: clamp(1.8rem, 1.6rem + 1vw, 2.4rem);
+  margin: 0.75rem 0 1rem;
+}
+.menu-page-intro p {
+  max-width: 34rem;
+  margin: 0 auto;
+  color: rgb(242 233 221 / 0.65);
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+
+.full-menu-tabs {
+  /* Not position: sticky here -- the whole .full-menu section is already
+     held fixed by GSAP's pin for the entire horizontal-scroll duration
+     (see FullMenuScroll.tsx), so this bar stays on screen for free as
+     the section's first child. Layering CSS sticky on top of that was
+     a second, independently-computed "stay in place" mechanism reading
+     the live viewport -- and on real mobile hardware, where the address
+     bar's show/hide animates the visual viewport height *during* the
+     scroll, that second mechanism could fall out of sync with GSAP's
+     own fixed positioning right as the pin released, causing the
+     jitter/bar-vanishing bug reported on a real Galaxy S8+ (never
+     reproduced on desktop, which has no dynamic toolbar). Removing it
+     leaves a single source of truth for the bar's position. margin-top
+     reproduces the same 5.5rem visual offset the old `top: 5.5rem`
+     produced while sticky. True sticky positioning is restored only
+     for the reduced-motion fallback below, via .full-menu-tabs--sticky,
+     where the section is never pinned and sticky is the only thing
+     keeping the bar in view. */
+  margin-top: 5.5rem;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1rem;
+  /* Mobile/portrait-first default: a plain bar flush to both viewport
+     edges, free to wrap to 2 rows if 6 real category names (some
+     considerably longer now that every category has real content, not
+     short "به‌زودی" placeholders) don't fit on one line. No floating
+     pill here -- at these widths a fully-rounded shape with 6 real
+     labels either overflowed sideways or wrapped into an ugly stadium
+     shape that also covered the card row underneath it. */
+  margin-inline: 0;
+  margin-bottom: 0;
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  background: rgb(28 22 19 / 0.92);
+  backdrop-filter: blur(8px);
+}
+
+/* Reduced-motion fallback only: .full-menu is never pinned in this mode
+   (see FullMenuScroll.tsx's `if (... || reducedMotion) return;` guard),
+   so the bar needs real CSS sticky to stay visible as the user scrolls
+   the section natively -- there's no GSAP fixed positioning to piggyback
+   on here, and no toolbar-resize/pin-boundary interaction risk since
+   nothing is pinned. */
+.full-menu-tabs--sticky {
+  position: sticky;
+  top: 5.5rem;
+  margin-top: 0;
+}
+
+@media (min-width: 1024px) {
+  /* Only at desktop widths is there reliably enough room for all 6 real
+     category names on one line -- switch to the floating rounded pill. */
+  .full-menu-tabs {
+    flex-wrap: nowrap;
+    justify-content: center;
+    margin-inline: auto;
+    max-width: 60rem;
+    padding: 1rem 1.25rem;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+  }
+}
+
+.full-menu-tab {
+  font-family: var(--font-fa);
+  font-size: 0.82rem;
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: rgb(242 233 221 / 0.55);
+  transition: color 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+  scroll-margin-top: 6rem;
+  cursor: pointer;
+}
+.full-menu-tab:hover {
+  color: var(--parchment);
+  border-color: var(--copper);
+}
+.full-menu-tab--active {
+  color: var(--ink);
+  background: var(--copper-bright);
+  border-color: var(--copper-bright);
+}
+
+/* Empty breathing room between the pinned menu section releasing and the
+   footer's top edge reaching the viewport -- see FullMenuScroll.tsx for
+   why. Plain unpinned flow, not part of the GSAP trigger/pin at all. */
+.full-menu-end-spacer {
+  height: 20vh;
+}
+
+/* ---------- Categories ---------- */
+.categories {
+  padding: 6rem 6vw;
+  /* text-align: start respects `dir` — right-aligned under the current
+     dir="rtl" document, and would automatically become left-aligned if
+     this ever renders under dir="ltr" (e.g. a future English locale). */
+  text-align: start;
+  background: var(--ink);
+}
+.categories-title {
+  font-family: var(--font-fa);
+  font-weight: 800;
+  font-size: clamp(1.6rem, 1.45rem + 0.75vw, 2rem);
+  margin: 0.75rem 0 1rem;
+}
+.categories-desc {
+  max-width: 34rem;
+  margin: 0 0 3rem;
+  color: rgb(242 233 221 / 0.65);
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+.categories-grid {
+  max-width: 72rem;
+  margin: 0 auto;
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(2, 1fr);
+}
+@media (min-width: 640px) {
+  .categories-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+.category-card-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+.category-card {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1.5rem 1rem;
+  min-height: 172px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.category-card-link:hover .category-card {
+  border-color: var(--copper);
+  transform: translateY(-2px);
+}
+.category-icon {
+  width: clamp(1.6rem, 1.31rem + 1.43vw, 2rem);
+  height: clamp(1.6rem, 1.31rem + 1.43vw, 2rem);
+  color: var(--copper-bright);
+  flex-shrink: 0;
+}
+.category-card h3 {
+  font-family: var(--font-fa);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--parchment);
+  margin-top: 0.75rem;
+}
+.category-card p {
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--gold);
+}
+.category-card--soon {
+  opacity: 0.45;
+  cursor: default;
+}
+.category-card--soon p {
+  color: rgb(242 233 221 / 0.4);
+}
+
+/* Category icon hover motion — ported from DivanCafe's Tailwind
+   group-hover:animate-* utilities. Keyframes match tailwind.config.ts
+   exactly (steam/sway/wiggle/jiggle/glint). */
+.icon-steam-group {
+  transform-origin: bottom;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.category-card:hover .icon-steam-group {
+  opacity: 1;
+}
+.category-card:hover .icon-steam {
+  animation: icon-steam 3.2s ease-in-out infinite;
+}
+.category-card:hover .icon-steam-delay {
+  animation: icon-steam 3.2s ease-in-out 1.1s infinite;
+}
+.icon-sway {
+  transform-origin: 6px 18px;
+}
+.category-card:hover .icon-sway {
+  animation: icon-sway 1.4s ease-in-out infinite;
+}
+.icon-wiggle {
+  transform-origin: center;
+}
+.category-card:hover .icon-wiggle {
+  animation: icon-wiggle 0.5s ease-in-out infinite;
+}
+.icon-jiggle {
+  transform-origin: center;
+}
+.category-card:hover .icon-jiggle {
+  animation: icon-jiggle 0.6s ease-in-out infinite;
+}
+.icon-glint {
+  opacity: 0.25;
+}
+.category-card:hover .icon-glint {
+  animation: icon-glint 1.2s ease-in-out infinite;
+}
+
+@keyframes icon-steam {
+  0%,
+  100% {
+    transform: translateY(0) scaleX(1);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translateY(-14px) scaleX(1.15);
+    opacity: 0.05;
+  }
+}
+@keyframes icon-sway {
+  0%,
+  100% {
+    transform: rotate(-6deg);
+  }
+  50% {
+    transform: rotate(6deg);
+  }
+}
+@keyframes icon-wiggle {
+  0%,
+  100% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(4deg);
+  }
+}
+@keyframes icon-jiggle {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+@keyframes icon-glint {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+/* ---------- Stats ---------- */
+.stats {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: var(--ink-2);
+  padding: 3.5rem 6vw;
+}
+.stats-grid {
+  max-width: 72rem;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+}
+@media (min-width: 640px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+.stat-item {
+  text-align: center;
+}
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: 2rem;
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
+}
+.stat-label {
+  margin-top: 0.5rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgb(242 233 221 / 0.6);
+}
+
+/* ---------- About story ---------- */
+.about-story {
+  position: relative;
+  background: var(--ink-2);
+  border-top: 1px solid var(--line);
+}
+
+.about-pin {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 6vw;
+  text-align: center;
+}
+
+.about-title {
+  font-family: var(--font-fa);
+  font-weight: 800;
+  font-size: clamp(1.7rem, 1.5rem + 1vw, 2.4rem);
+  max-width: 40rem;
+  margin: 1rem 0 3rem;
+  line-height: 1.4;
+}
+
+.about-paragraphs {
+  position: relative;
+  width: 100%;
+  max-width: 42rem;
+  min-height: 12rem;
+}
+
+.about-paragraph {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  /* Deliberately no `bottom: 0` — unlike inset:0, this lets each stacked
+     paragraph's height stay auto/content-based instead of being force-
+     stretched to the container's min-height, so a longer paragraph (more
+     line-wraps on mobile) doesn't get clipped or overlap the next
+     section. */
+  font-family: var(--font-fa);
+  font-size: clamp(1rem, 0.96rem + 0.21vw, 1.15rem);
+  line-height: 2;
+  color: rgb(242 233 221 / 0.85);
+}
+
+.about-paragraphs--static {
+  position: static;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.about-paragraphs--static .about-paragraph {
+  position: static;
+}
+
+.about-values {
+  padding: 6rem 6vw 8rem;
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+.about-values-title {
+  text-align: center;
+  font-size: 0.72rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 3rem;
+}
+
+.about-values-grid {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 768px) {
+  .about-values-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.about-value-card {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1.75rem;
+  text-align: center;
+}
+.about-value-card h3 {
+  font-family: var(--font-fa);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--copper-bright);
+  margin-bottom: 0.6rem;
+}
+.about-value-card p {
+  font-size: 0.9rem;
+  color: rgb(242 233 221 / 0.65);
+  line-height: 1.7;
+}
+
+/* Fluid clamp() above handles about-title/about-paragraph sizing across
+   every width now -- no separate breakpoint override needed. */
+
+/* ---------- Menu scroll ---------- */
+.h-scroll {
+  position: relative;
+  background: var(--ink-2);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.h-intro {
+  padding: 6rem 6vw 3rem;
+}
+
+.eyebrow-static {
+  font-size: 0.72rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1rem;
+}
+
+.h-intro h2 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.7rem, 1.5rem + 1vw, 2.2rem);
+  max-width: 560px;
+  line-height: 1.25;
+}
+
+.h-viewport {
+  position: relative;
+  padding: 0 6vw 4rem;
+}
+
+.h-track {
+  position: relative; /* makes child .h-card offsetLeft measured from the
+    track's own edge, independent of the track's current GSAP x transform
+    -- FullMenuScroll's click-to-jump math depends on this being stable */
+  display: flex;
+  gap: 1.25rem;
+  will-change: transform;
+}
+
+/* Fluid card width: scales continuously with viewport width instead of
+   jumping between fixed breakpoint values (the old 300px desktop /
+   220px "landscape tablet" / 72vw "mobile" patchwork produced an
+   oversized card specifically in the ~640-900px landscape range, since
+   72vw was tuned assuming a tall narrow portrait screen). clamp() gives
+   every width its own proportionate size with no discontinuity to
+   "look off" at any particular breakpoint. */
+.h-card {
+  position: relative;
+  flex: 0 0 clamp(11.5rem, 26vw, 18.75rem); /* 184px .. 300px */
+  aspect-ratio: 3 / 4;
+  border-radius: 2px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--ink);
+}
+
+.h-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(14, 13, 12, 0.8) 0%, rgba(14, 13, 12, 0.05) 45%, transparent 65%);
+}
+
+.h-cat {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  font-size: clamp(0.6rem, 1vw + 0.4rem, 0.65rem);
+  letter-spacing: 0.14em;
+  color: var(--gold);
+}
+
+.h-label {
+  position: absolute;
+  left: 1rem;
+  bottom: 1rem;
+  font-family: var(--font-fa);
+  font-weight: 600;
+  font-size: clamp(0.82rem, 1.2vw + 0.6rem, 0.95rem);
+}
+
+.h-price {
+  position: absolute;
+  left: 1rem;
+  bottom: 2.4rem;
+  font-family: var(--font-fa);
+  font-size: clamp(0.68rem, 0.9vw + 0.5rem, 0.75rem);
+  color: var(--gold);
+}
+
+/* Native horizontal scroll is now only used for the prefers-reduced-motion
+   fallback (see FeaturedMenu.tsx / FullMenuScroll.tsx) -- the pinned
+   scroll-to-scrub technique below applies at every viewport width for
+   everyone else, so there's no separate "mobile" scroll mode to size for
+   anymore. */
+.h-viewport--static {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none; /* Firefox */
+}
+.h-viewport--static::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Edge */
+}
+.h-viewport--static .h-track {
+  width: max-content;
+}
+.h-viewport--static .h-card {
+  scroll-snap-align: start;
+}
+
+.h-cta-wrap {
+  text-align: center;
+  padding: 0 6vw 5rem;
+}
+.h-cta {
+  display: inline-block;
+  padding: 0.9rem 2.2rem;
+  border: 1px solid var(--copper);
+  color: var(--parchment);
+  text-decoration: none;
+  font-family: var(--font-fa);
+  font-size: 0.9rem;
+  border-radius: 999px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.h-cta:hover {
+  background: var(--copper);
+  color: var(--ink);
+}
+
+/* ---------- CTA ---------- */
+.cta {
+  padding: 10rem 6vw 8rem;
+  text-align: center;
+  border-top: 1px solid var(--line);
+}
+
+.cta h3 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-style: italic;
+  font-size: 2.1rem;
+  max-width: 560px;
+  margin: 0 auto 1.6rem;
+  line-height: 1.3;
+}
+
+.cta a {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.9rem 2.2rem;
+  border: 1px solid var(--copper);
+  color: var(--parchment);
+  text-decoration: none;
+  font-size: 0.85rem;
+  border-radius: 999px;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+.cta a:hover {
+  background: var(--copper);
+  color: var(--ink);
+}
+.cta footer {
+  margin-top: 5rem;
+  font-size: 0.7rem;
+  color: rgba(237, 230, 214, 0.35);
+  letter-spacing: 0.08em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Fluid clamp() above handles title-fa/title-en/title-stack sizing across
+   every width now -- no separate breakpoint override needed. */
+
+/* ---------- Header (scoped port of DivanCafe's Header.tsx) ---------- */
+.focus-ring:focus-visible {
+  outline: 2px solid var(--copper-bright);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.skip-link {
+  position: absolute;
+  top: -3rem;
+  left: 1rem;
+  z-index: 100;
+  background: var(--copper);
+  color: var(--ink);
+  padding: 0.6rem 1rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+.skip-link:focus {
+  top: 1rem;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.site-header {
+  position: sticky;
+  top: 0.75rem;
+  z-index: 40;
+  margin: 0 0.75rem;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgb(28 22 19 / 0.95);
+  backdrop-filter: blur(10px);
+}
+@media (min-width: 1024px) {
+  .site-header {
+    margin: 0.75rem auto 0;
+    max-width: 72rem;
+  }
+}
+
+.site-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  gap: 1rem;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.logo-mark {
+  height: 2rem;
+  width: 2rem;
+  flex-shrink: 0;
+  color: var(--copper-bright);
+}
+.logo-wordmark {
+  font-family: var(--font-fa);
+  font-size: 1.25rem;
+  letter-spacing: 0.04em;
+  color: var(--parchment);
+}
+
+.site-nav {
+  display: none;
+  align-items: center;
+  gap: 2rem;
+}
+@media (min-width: 1024px) {
+  .site-nav {
+    display: flex;
+  }
+}
+.site-nav-link {
+  font-family: var(--font-fa);
+  font-size: 0.9rem;
+  color: rgb(242 233 221 / 0.8);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.site-nav-link:hover {
+  color: var(--copper-bright);
+}
+
+.reserve-pill {
+  font-family: var(--font-fa);
+  font-size: 0.85rem;
+  color: var(--copper-bright);
+  border: 1px solid var(--copper);
+  border-radius: 999px;
+  padding: 0.5rem 1.1rem;
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease;
+  white-space: nowrap;
+}
+.reserve-pill:hover {
+  background: var(--copper);
+  color: var(--ink);
+}
+
+.site-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.mobile-nav-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: transparent;
+  flex-shrink: 0;
+}
+@media (min-width: 1024px) {
+  .mobile-nav-toggle {
+    display: none;
+  }
+}
+
+.mobile-nav-icon,
+.mobile-nav-icon::before,
+.mobile-nav-icon::after {
+  display: block;
+  width: 1.1rem;
+  height: 1.5px;
+  background: var(--parchment);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.mobile-nav-icon {
+  position: relative;
+}
+.mobile-nav-icon::before,
+.mobile-nav-icon::after {
+  content: '';
+  position: absolute;
+  right: 0;
+}
+.mobile-nav-icon::before {
+  top: -0.4rem;
+}
+.mobile-nav-icon::after {
+  top: 0.4rem;
+}
+.mobile-nav-icon--open {
+  background: transparent;
+}
+.mobile-nav-icon--open::before {
+  top: 0;
+  transform: rotate(45deg);
+}
+.mobile-nav-icon--open::after {
+  top: 0;
+  transform: rotate(-45deg);
+}
+
+.mobile-nav-panel {
+  border-top: 1px solid var(--line);
+  padding: 0.5rem 1.25rem 1rem;
+}
+.mobile-nav-panel nav {
+  display: flex;
+  flex-direction: column;
+}
+.mobile-nav-link {
+  padding: 0.75rem 0.25rem;
+  font-family: var(--font-fa);
+  font-size: 0.95rem;
+  color: rgb(242 233 221 / 0.85);
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
+}
+.mobile-nav-link:last-child {
+  border-bottom: none;
+}
+
+/* ---------- Footer (scoped port of DivanCafe's Footer.tsx) ---------- */
+.site-footer {
+  border-top: 1px solid var(--line);
+  background: var(--ink);
+  padding: 4rem 1.25rem 2.5rem;
+}
+.site-footer-inner {
+  max-width: 72rem;
+  margin: 0 auto;
+}
+.footer-grid {
+  display: grid;
+  gap: 2.5rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 640px) {
+  .footer-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (min-width: 768px) {
+  .footer-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+.footer-wordmark {
+  font-family: var(--font-fa);
+  font-size: 1.5rem;
+  color: var(--parchment);
+}
+.footer-tagline {
+  margin-top: 0.75rem;
+  max-width: 22rem;
+  font-size: 0.9rem;
+  color: rgb(242 233 221 / 0.6);
+}
+.footer-heading {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--copper-bright);
+}
+.footer-list {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: rgb(242 233 221 / 0.7);
+  list-style: none;
+}
+.footer-list a {
+  color: inherit;
+  text-decoration: none;
+}
+.footer-list a:hover {
+  color: var(--gold);
+}
+.footer-ltr {
+  direction: ltr;
+  text-align: start;
+}
+.footer-bottom {
+  margin-top: 3.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.72rem;
+  color: rgb(242 233 221 / 0.5);
+}
+@media (min-width: 640px) {
+  .footer-bottom {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
