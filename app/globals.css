@@ -240,8 +240,24 @@ body {
 }
 
 .full-menu-tabs {
-  position: sticky;
-  top: 5.5rem;
+  /* Not position: sticky here -- the whole .full-menu section is already
+     held fixed by GSAP's pin for the entire horizontal-scroll duration
+     (see FullMenuScroll.tsx), so this bar stays on screen for free as
+     the section's first child. Layering CSS sticky on top of that was
+     a second, independently-computed "stay in place" mechanism reading
+     the live viewport -- and on real mobile hardware, where the address
+     bar's show/hide animates the visual viewport height *during* the
+     scroll, that second mechanism could fall out of sync with GSAP's
+     own fixed positioning right as the pin released, causing the
+     jitter/bar-vanishing bug reported on a real Galaxy S8+ (never
+     reproduced on desktop, which has no dynamic toolbar). Removing it
+     leaves a single source of truth for the bar's position. margin-top
+     reproduces the same 5.5rem visual offset the old `top: 5.5rem`
+     produced while sticky. True sticky positioning is restored only
+     for the reduced-motion fallback below, via .full-menu-tabs--sticky,
+     where the section is never pinned and sticky is the only thing
+     keeping the bar in view. */
+  margin-top: 5.5rem;
   z-index: 10;
   display: flex;
   flex-wrap: wrap;
@@ -255,12 +271,25 @@ body {
      pill here -- at these widths a fully-rounded shape with 6 real
      labels either overflowed sideways or wrapped into an ugly stadium
      shape that also covered the card row underneath it. */
-  margin: 0;
+  margin-inline: 0;
+  margin-bottom: 0;
   border-radius: 0;
   border: none;
   border-bottom: 1px solid var(--line);
   background: rgb(28 22 19 / 0.92);
   backdrop-filter: blur(8px);
+}
+
+/* Reduced-motion fallback only: .full-menu is never pinned in this mode
+   (see FullMenuScroll.tsx's `if (... || reducedMotion) return;` guard),
+   so the bar needs real CSS sticky to stay visible as the user scrolls
+   the section natively -- there's no GSAP fixed positioning to piggyback
+   on here, and no toolbar-resize/pin-boundary interaction risk since
+   nothing is pinned. */
+.full-menu-tabs--sticky {
+  position: sticky;
+  top: 5.5rem;
+  margin-top: 0;
 }
 
 @media (min-width: 1024px) {
@@ -269,7 +298,7 @@ body {
   .full-menu-tabs {
     flex-wrap: nowrap;
     justify-content: center;
-    margin: 0 auto;
+    margin-inline: auto;
     max-width: 60rem;
     padding: 1rem 1.25rem;
     border-radius: 999px;

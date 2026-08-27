@@ -152,7 +152,11 @@ export default function FullMenuScroll() {
 
   return (
     <section ref={sectionRef} className="full-menu">
-      <div className="full-menu-tabs" role="group" aria-label="پرش به دسته‌بندی منو">
+      <div
+        className={'full-menu-tabs' + (reducedMotion ? ' full-menu-tabs--sticky' : '')}
+        role="group"
+        aria-label="پرش به دسته‌بندی منو"
+      >
         {CATEGORY_META.map((cat) => {
           const available = availableCategories.some((c) => c.slug === cat.slug);
           const isActive = available && activeCategory === cat.slug;
