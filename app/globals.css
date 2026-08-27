@@ -29,11 +29,25 @@
    owns scroll smoothing site-wide, including anchor-link jumps. Native
    scroll-behavior:smooth here would double up with Lenis's own easing. */
 
+html {
+  /* Disables the browser's native overscroll "bounce"/rubber-band effect
+     at the very top/bottom of the page. Without this, scrolling past the
+     document's natural end (e.g. arriving at the footer, the last element
+     on every page) can briefly overshoot and spring back -- which reads
+     as content jumping backward right where a pinned section like
+     FullMenuScroll releases into the footer, even though the pin itself
+     isn't doing anything wrong at that point. Independent of the GSAP/
+     Lenis/normalizeScroll setup in SmoothScroll.tsx -- this is purely
+     native browser bounce suppression. */
+  overscroll-behavior-y: none;
+}
+
 body {
   background: var(--ink);
   color: var(--parchment);
   font-family: var(--font-body);
   overflow-x: hidden;
+  overscroll-behavior-y: none;
 }
 
 /* Sticky header height compensation, so anchor-nav targets don't land
