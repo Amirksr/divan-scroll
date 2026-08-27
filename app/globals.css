@@ -342,6 +342,13 @@ body {
   border-color: var(--copper-bright);
 }
 
+/* Empty breathing room between the pinned menu section releasing and the
+   footer's top edge reaching the viewport -- see FullMenuScroll.tsx for
+   why. Plain unpinned flow, not part of the GSAP trigger/pin at all. */
+.full-menu-end-spacer {
+  height: 20vh;
+}
+
 /* ---------- Categories ---------- */
 .categories {
   padding: 6rem 6vw;

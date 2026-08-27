@@ -47,6 +47,14 @@ export default function FullMenuScroll() {
     return getHorizontalScrollDistance(track.scrollWidth, window.innerWidth, getSidePadding());
   };
 
+  // Debug-only, opt-in via ?debug=1 -- lets GSAP's own visual markers and a
+  // console log of every end-distance recalculation show directly whether
+  // the pin's end point is shifting mid-scroll (which would explain the
+  // footer/card snap-back reported on a real device), instead of guessing
+  // again. No effect at all without the query param.
+  const debugMode =
+    typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('debug');
+
   // Pinned scroll-to-scrub, at every viewport width (see FeaturedMenu for
   // the same pattern and rationale) -- native scroll-snap now only kicks
   // in for prefers-reduced-motion via .h-viewport--static below.
@@ -62,11 +70,24 @@ export default function FullMenuScroll() {
         scrollTrigger: {
           trigger: sectionRef.current,
           start: 'top top',
-          end: () => '+=' + getDistance(),
+          end: () => {
+            const distance = getDistance();
+            if (debugMode) {
+              // eslint-disable-next-line no-console
+              console.log('[full-menu-scroll] end recalculated', {
+                distance,
+                trackScrollWidth: track.scrollWidth,
+                windowInnerWidth: window.innerWidth,
+                time: performance.now(),
+              });
+            }
+            return '+=' + distance;
+          },
           scrub: 0.5,
           pin: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
+          markers: debugMode,
         },
       });
 
@@ -151,6 +172,7 @@ export default function FullMenuScroll() {
   };
 
   return (
+    <>
     <section ref={sectionRef} className="full-menu">
       <div
         className={'full-menu-tabs' + (reducedMotion ? ' full-menu-tabs--sticky' : '')}
@@ -216,5 +238,14 @@ export default function FullMenuScroll() {
         </div>
       </div>
     </section>
+    {/* Deliberate breathing room between the pinned section releasing
+        (last card already fully shown, section back in normal flow) and
+        the footer's top edge reaching the viewport. Without this, the
+        footer began entering on the very next scroll pixel after the pin
+        let go, with no defined gap -- which read as the footer colliding
+        with the still-settling cards and jumping. This is plain
+        unpinned document flow, no GSAP timing involved. */}
+    <div className="full-menu-end-spacer" aria-hidden="true" />
+    </>
   );
 }
