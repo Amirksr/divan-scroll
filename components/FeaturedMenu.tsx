@@ -59,7 +59,7 @@ export default function FeaturedMenu() {
           trigger: sectionRef.current,
           start: 'top top',
           end: () => '+=' + getDistance(),
-          scrub: 0.5,
+          scrub: true,
           pin: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
