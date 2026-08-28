@@ -105,7 +105,7 @@ export default function FullMenuScroll() {
             }
             return '+=' + distance;
           },
-          scrub: 0.5,
+          scrub: true,
           pin: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
