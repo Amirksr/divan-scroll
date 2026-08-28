@@ -6,7 +6,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { MENU_ITEMS, formatToman } from '@/lib/menu-data';
 import { CATEGORY_META, getOrderedAvailableCategories, type CategorySlug } from '@/lib/categories-data';
-import { getHorizontalScrollDistance } from '@/lib/scroll-utils';
+import { getHorizontalScrollDistance, getCachedByWidth, type WidthCachedValue } from '@/lib/scroll-utils';
 import { pickActiveCategory, type CategoryProbe } from '@/lib/category-scroll-utils';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useIsomorphicLayoutEffect } from '@/hooks/useIsomorphicLayoutEffect';
@@ -31,6 +31,14 @@ export default function FullMenuScroll() {
   // target card position into an absolute page scroll position. Null
   // under reduced motion, where there's no pin at all.
   const scrollTriggerRef = useRef<ScrollTrigger | null>(null);
+  // Caches the computed pin distance by viewport width -- see
+  // getCachedByWidth's doc comment. Without this, GSAP's `end`/`x`
+  // functional values get re-evaluated on every refresh (including ones
+  // triggered by things unrelated to this section, mid-scroll), and any
+  // sub-pixel wobble in track.scrollWidth between two of those calls
+  // silently shifts the pin's end point -- producing the footer/card
+  // snap right as the pin releases.
+  const distanceCacheRef = useRef<WidthCachedValue<number> | null>(null);
   const reducedMotion = useReducedMotion();
   const [activeCategory, setActiveCategory] = useState<string | undefined>(
     availableCategories[0]?.slug
@@ -44,7 +52,21 @@ export default function FullMenuScroll() {
   const getDistance = () => {
     const track = trackRef.current;
     if (!track) return 0;
-    return getHorizontalScrollDistance(track.scrollWidth, window.innerWidth, getSidePadding());
+    const width = window.innerWidth;
+    const previous = distanceCacheRef.current;
+    distanceCacheRef.current = getCachedByWidth(previous, width, () =>
+      Math.round(getHorizontalScrollDistance(track.scrollWidth, width, getSidePadding()))
+    );
+    if (debugMode && distanceCacheRef.current !== previous) {
+      // eslint-disable-next-line no-console
+      console.log('[full-menu-scroll] distance recomputed (width changed)', {
+        previousWidth: previous?.width,
+        newWidth: width,
+        distance: distanceCacheRef.current.value,
+        time: performance.now(),
+      });
+    }
+    return distanceCacheRef.current.value;
   };
 
   // Debug-only, opt-in via ?debug=1 -- lets GSAP's own visual markers and a
@@ -87,6 +109,14 @@ export default function FullMenuScroll() {
           pin: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
+          // Lets the eased scrub tween fast-forward to its end value when
+          // the user scrolls quickly instead of continuing to ease toward
+          // it after the raw scroll position has already passed the
+          // trigger's end -- that lag is what let the pin release (raw
+          // scroll past `end`) while the track's x was still a few cards
+          // behind, producing the visible card/footer snap. Documented
+          // GSAP fix for this exact class of pin+scrub end jump.
+          fastScrollEnd: true,
           markers: debugMode,
         },
       });
@@ -96,6 +126,12 @@ export default function FullMenuScroll() {
 
     return () => {
       scrollTriggerRef.current = null;
+      // Discard the cached distance too -- a stale width-keyed entry from
+      // before this effect re-ran (e.g. prefers-reduced-motion toggling
+      // live) could otherwise be reused even though the track's own
+      // scrollWidth may now measure differently (h-viewport--static
+      // changes .h-track's layout mode).
+      distanceCacheRef.current = null;
       ctx.revert();
     };
   }, [reducedMotion]);
