@@ -78,6 +78,21 @@ export default function SmoothScroll() {
 
     lenis.on('scroll', ScrollTrigger.update);
 
+    // GSAP -> Lenis sync (the reverse of the line above). ScrollTrigger
+    // fires "refresh" whenever it recalculates pin distances from the
+    // live DOM -- including FullMenuScroll's, which is easily 15,000+px
+    // on its own. Lenis maintains its own independent internal scroll
+    // limit (see dimensions.resize() in the lenis package) and has no
+    // way to know that changed unless told explicitly. Without this,
+    // Lenis's momentum/clamping can act on a stale (shorter) limit from
+    // before that pin's true height was known, and correcting against
+    // that stale limit produces a real scrollY snap-back -- which lands
+    // right at the pin's release point since that's where the
+    // discrepancy is largest. This is GSAP's own documented
+    // recommendation for pairing ScrollTrigger with Lenis.
+    const onRefresh = () => lenis.resize();
+    ScrollTrigger.addEventListener('refresh', onRefresh);
+
     const tick = (time: number) => {
       lenis.raf(time * 1000);
     };
@@ -85,6 +100,7 @@ export default function SmoothScroll() {
     gsap.ticker.lagSmoothing(0);
 
     return () => {
+      ScrollTrigger.removeEventListener('refresh', onRefresh);
       gsap.ticker.remove(tick);
       lenis.destroy();
       lenisRef.current = null;
