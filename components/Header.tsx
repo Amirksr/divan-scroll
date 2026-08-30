@@ -3,12 +3,14 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Logo from './Logo';
+import CartButton from './CartButton';
 
 /**
- * Scoped port of DivanCafe's src/components/Header.tsx. Dropped for now:
- * ThemeToggle, CartButton, LanguageSwitcher, and route-based active-link
- * detection (usePathname). Reserve keeps the same visual treatment
- * (outlined copper pill) as the real header's CTA.
+ * Scoped port of DivanCafe's src/components/Header.tsx. Still dropped:
+ * ThemeToggle, LanguageSwitcher, and route-based active-link detection
+ * (usePathname). Reserve keeps the same visual treatment (outlined copper
+ * pill) as the real header's CTA. CartButton (see CartButton.tsx) was
+ * added once the menu detail modal + cart feature landed.
  *
  * MobileNav (dropped from the initial port) is now implemented below --
  * .site-nav is display:none under 1024px with no fallback otherwise,
@@ -77,6 +79,8 @@ export default function Header() {
           <Link href="/#footer-contact" className="reserve-pill focus-ring">
             رزرو میز
           </Link>
+
+          <CartButton />
 
           <button
             ref={toggleRef}

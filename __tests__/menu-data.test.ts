@@ -104,7 +104,10 @@ describe('MENU_ITEMS (real data sanity checks)', () => {
     }
   });
 
-  it('exactly 6 items are featured, matching the hero gallery (unchanged by the new categories)', () => {
-    expect(getFeaturedItems().length).toBe(6);
+  it('has exactly 20 featured items, spanning all 6 categories (raised from 6 for the featured/popular carousel)', () => {
+    const featured = getFeaturedItems();
+    expect(featured.length).toBe(20);
+    const categoriesRepresented = new Set(featured.map((item) => item.category));
+    expect(categoriesRepresented.size).toBe(6);
   });
 });

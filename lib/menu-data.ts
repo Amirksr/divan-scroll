@@ -227,7 +227,7 @@ export const MENU_ITEMS: MenuItem[] = [
     vegetarian: false,
     category: 'brunch',
     image: '/images/menu/gheimeh.webp',
-    featured: false,
+    featured: true,
   },
   {
     id: 'omlet-gharch',
@@ -325,7 +325,7 @@ export const MENU_ITEMS: MenuItem[] = [
     vegetarian: true,
     category: 'cold',
     image: '/images/menu/cold-brew.webp',
-    featured: false,
+    featured: true,
   },
   {
     id: 'iced-shekar',
@@ -367,7 +367,7 @@ export const MENU_ITEMS: MenuItem[] = [
     vegetarian: true,
     category: 'tea',
     image: '/images/menu/saffron-latte.webp',
-    featured: false,
+    featured: true,
   },
   {
     id: 'chai-bahar',
@@ -395,7 +395,7 @@ export const MENU_ITEMS: MenuItem[] = [
     vegetarian: true,
     category: 'breakfast',
     image: '/images/menu/eggs-kuku.webp',
-    featured: false,
+    featured: true,
   },
   {
     id: 'panir-sabzi',
@@ -437,7 +437,7 @@ export const MENU_ITEMS: MenuItem[] = [
     vegetarian: true,
     category: 'pastry',
     image: '/images/menu/baklava.webp',
-    featured: false,
+    featured: true,
   },
   {
     id: 'saffron-croissant',
@@ -521,7 +521,7 @@ export const MENU_ITEMS: MenuItem[] = [
     vegetarian: true,
     category: 'cold',
     image: '/images/menu/frappuccino.webp',
-    featured: false,
+    featured: true,
   },
   {
     id: 'caramel-frappuccino',
@@ -689,7 +689,7 @@ export const MENU_ITEMS: MenuItem[] = [
     vegetarian: true,
     category: 'pastry',
     image: '/images/menu/tiramisu.webp',
-    featured: false,
+    featured: true,
   },
   {
     id: 'cheesecake',
@@ -787,7 +787,7 @@ export const MENU_ITEMS: MenuItem[] = [
     vegetarian: true,
     category: 'pastry',
     image: '/images/menu/chocolate-lava-cake.webp',
-    featured: false,
+    featured: true,
   },
   {
     id: 'waffle',
@@ -815,7 +815,7 @@ export const MENU_ITEMS: MenuItem[] = [
     vegetarian: true,
     category: 'coffee',
     image: '/images/menu/espresso.webp',
-    featured: false,
+    featured: true,
   },
   {
     id: 'cortado',
@@ -829,7 +829,7 @@ export const MENU_ITEMS: MenuItem[] = [
     vegetarian: true,
     category: 'coffee',
     image: '/images/menu/cortado.webp',
-    featured: false,
+    featured: true,
   },
   {
     id: 'flat-white',
@@ -955,7 +955,7 @@ export const MENU_ITEMS: MenuItem[] = [
     vegetarian: true,
     category: 'coffee',
     image: '/images/menu/cappuccino.webp',
-    featured: false,
+    featured: true,
   },
   {
     id: 'latte',
@@ -1165,7 +1165,7 @@ export const MENU_ITEMS: MenuItem[] = [
     vegetarian: false,
     category: 'brunch',
     image: '/images/menu/joojeh-kabab.webp',
-    featured: false,
+    featured: true,
   },
   {
     id: 'kabab-koobideh',
@@ -1179,7 +1179,7 @@ export const MENU_ITEMS: MenuItem[] = [
     vegetarian: false,
     category: 'brunch',
     image: '/images/menu/kabab-koobideh.webp',
-    featured: false,
+    featured: true,
   },
   {
     id: 'zereshk-polo-morgh',
@@ -1193,7 +1193,7 @@ export const MENU_ITEMS: MenuItem[] = [
     vegetarian: false,
     category: 'brunch',
     image: '/images/menu/zereshk-polo-morgh.webp',
-    featured: false,
+    featured: true,
   },
   {
     id: 'meygoo-polo',

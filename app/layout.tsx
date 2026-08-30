@@ -3,6 +3,7 @@ import { Newsreader, Vazirmatn, Inter, JetBrains_Mono } from 'next/font/google';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import SmoothScroll from '@/components/SmoothScroll';
+import { CartProvider } from '@/components/CartContext';
 import './globals.css';
 
 // DivanCafe itself loads these via a <link> to fonts.googleapis.com rather
@@ -54,9 +55,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           رفتن به محتوای اصلی
         </a>
         <SmoothScroll />
-        <Header />
-        <main id="main">{children}</main>
-        <Footer />
+        <CartProvider>
+          <Header />
+          <main id="main">{children}</main>
+          <Footer />
+        </CartProvider>
       </body>
     </html>
   );

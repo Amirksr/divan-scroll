@@ -1,15 +1,16 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { getFeaturedItems, formatToman } from '@/lib/menu-data';
+import { getFeaturedItems, formatToman, type MenuItem } from '@/lib/menu-data';
 import { CATEGORY_META } from '@/lib/categories-data';
 import { getHorizontalScrollDistance, getCachedByWidth, type WidthCachedValue } from '@/lib/scroll-utils';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useIsomorphicLayoutEffect } from '@/hooks/useIsomorphicLayoutEffect';
+import MenuItemModal from './MenuItemModal';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -26,6 +27,7 @@ export default function FeaturedMenu() {
   // point silently shifting mid-scroll if a spurious refresh recomputes
   // it from a slightly different track.scrollWidth reading).
   const distanceCacheRef = useRef<WidthCachedValue<number> | null>(null);
+  const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
 
   useIsomorphicLayoutEffect(() => {
     if (!sectionRef.current || !trackRef.current || reducedMotion) return;
@@ -59,13 +61,14 @@ export default function FeaturedMenu() {
           trigger: sectionRef.current,
           start: 'top top',
           end: () => '+=' + getDistance(),
+          // See FullMenuScroll.tsx: scrub: true removes the redundant
+          // second easing layer on top of Lenis/normalizeScroll, which is
+          // what let the visible track lag behind the raw scroll position
+          // at the pin's end on fast touch flicks.
           scrub: true,
           pin: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
-          // See FullMenuScroll.tsx -- lets the eased scrub tween
-          // fast-forward when the raw scroll position outruns it, instead
-          // of releasing the pin before the track has visually caught up.
           fastScrollEnd: true,
         },
       });
@@ -90,7 +93,13 @@ export default function FeaturedMenu() {
       >
         <div ref={trackRef} className="h-track">
           {items.map((item, i) => (
-            <div className="h-card" key={item.id} dir="rtl">
+            <button
+              type="button"
+              className="h-card"
+              key={item.id}
+              dir="rtl"
+              onClick={() => setSelectedItem(item)}
+            >
               <Image
                 src={item.image}
                 alt={item.labelFa}
@@ -103,7 +112,7 @@ export default function FeaturedMenu() {
               <span className="h-cat">{CATEGORY_META.find((c) => c.slug === item.category)?.name}</span>
               <span className="h-price">{formatToman(item.price)}</span>
               <span className="h-label">{item.labelFa}</span>
-            </div>
+            </button>
           ))}
         </div>
       </div>
@@ -112,6 +121,7 @@ export default function FeaturedMenu() {
           مشاهده‌ی کل منو ←
         </Link>
       </div>
+      <MenuItemModal item={selectedItem} onClose={() => setSelectedItem(null)} />
     </section>
   );
 }

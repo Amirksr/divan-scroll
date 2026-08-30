@@ -4,13 +4,14 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { MENU_ITEMS, formatToman } from '@/lib/menu-data';
+import { MENU_ITEMS, formatToman, type MenuItem } from '@/lib/menu-data';
 import { CATEGORY_META, getOrderedAvailableCategories, type CategorySlug } from '@/lib/categories-data';
 import { getHorizontalScrollDistance, getCachedByWidth, type WidthCachedValue } from '@/lib/scroll-utils';
 import { pickActiveCategory, type CategoryProbe } from '@/lib/category-scroll-utils';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useIsomorphicLayoutEffect } from '@/hooks/useIsomorphicLayoutEffect';
 import { lenisInstance } from '@/lib/lenis-instance';
+import MenuItemModal from './MenuItemModal';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -26,7 +27,7 @@ export default function FullMenuScroll() {
   // One ref per available category, pointing at that category's first card
   // — used both by the IntersectionObserver (which category is active)
   // and by the tab click handler (where to scroll/jump to).
-  const probeRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const probeRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   // The ScrollTrigger driving the pin, so the click handler can convert a
   // target card position into an absolute page scroll position. Null
   // under reduced motion, where there's no pin at all.
@@ -43,6 +44,7 @@ export default function FullMenuScroll() {
   const [activeCategory, setActiveCategory] = useState<string | undefined>(
     availableCategories[0]?.slug
   );
+  const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
 
   const getSidePadding = () => {
     const el = viewportRef.current;
@@ -105,17 +107,24 @@ export default function FullMenuScroll() {
             }
             return '+=' + distance;
           },
+          // scrub: true (not a numeric duration) binds the track's x
+          // directly to raw scroll progress every tick, with no separate
+          // eased "catch-up" tween. Lenis (desktop) and
+          // ScrollTrigger.normalizeScroll (touch, see SmoothScroll.tsx)
+          // already smooth the raw scroll input itself, so an additional
+          // numeric scrub was a second, independent easing layer on top --
+          // on fast touch flicks in particular, that second layer could
+          // still be mid-ease when the raw scroll position reached the
+          // trigger's end and the pin released, leaving the visible cards
+          // a few frames behind and producing the footer/card snap
+          // confirmed via ?debug=1: the end marker itself never moved, the
+          // rendered track position just hadn't caught up to it yet.
           scrub: true,
           pin: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
-          // Lets the eased scrub tween fast-forward to its end value when
-          // the user scrolls quickly instead of continuing to ease toward
-          // it after the raw scroll position has already passed the
-          // trigger's end -- that lag is what let the pin release (raw
-          // scroll past `end`) while the track's x was still a few cards
-          // behind, producing the visible card/footer snap. Documented
-          // GSAP fix for this exact class of pin+scrub end jump.
+          // Kept as a defensive backstop; harmless with scrub: true since
+          // there's no scrub tween left to fast-forward.
           fastScrollEnd: true,
           markers: debugMode,
         },
@@ -146,7 +155,7 @@ export default function FullMenuScroll() {
     if (availableCategories.length <= 1) return; // nothing to highlight between
 
     const probeEntries = Object.entries(probeRefs.current).filter(
-      (entry): entry is [string, HTMLDivElement] => entry[1] !== null
+      (entry): entry is [string, HTMLButtonElement] => entry[1] !== null
     );
     if (probeEntries.length === 0) return;
 
@@ -243,7 +252,8 @@ export default function FullMenuScroll() {
           {items.map((item, i) => {
             const isFirstInCategory = items.findIndex((it) => it.category === item.category) === i;
             return (
-              <div
+              <button
+                type="button"
                 className="h-card"
                 key={item.id}
                 dir="rtl"
@@ -255,6 +265,7 @@ export default function FullMenuScroll() {
                     : undefined
                 }
                 data-category={isFirstInCategory ? item.category : undefined}
+                onClick={() => setSelectedItem(item)}
               >
                 <Image
                   src={item.image}
@@ -268,7 +279,7 @@ export default function FullMenuScroll() {
                 <span className="h-cat">{CATEGORY_META.find((c) => c.slug === item.category)?.name}</span>
                 <span className="h-price">{formatToman(item.price)}</span>
                 <span className="h-label">{item.labelFa}</span>
-              </div>
+              </button>
             );
           })}
         </div>
@@ -282,6 +293,7 @@ export default function FullMenuScroll() {
         with the still-settling cards and jumping. This is plain
         unpinned document flow, no GSAP timing involved. */}
     <div className="full-menu-end-spacer" aria-hidden="true" />
+    <MenuItemModal item={selectedItem} onClose={() => setSelectedItem(null)} />
     </>
   );
 }

@@ -88,6 +88,16 @@ export function BowlIcon(props: IconProps) {
   );
 }
 
+export function CartIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M3 4h2l1.6 10.2A2 2 0 0 0 8.58 16H17a2 2 0 0 0 1.95-1.56L20.5 8H6.5" />
+      <circle cx="9" cy="20" r="1.4" />
+      <circle cx="17" cy="20" r="1.4" />
+    </svg>
+  );
+}
+
 export const categoryIcons = {
   coffee: CoffeeIcon,
   tea: LeafIcon,
