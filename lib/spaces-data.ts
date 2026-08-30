@@ -37,7 +37,7 @@ export const SPACES: Space[] = [
     description: 'طاق‌های آجری اصیل با میزهای چوب گردو',
     coverImage: '/images/gallery/interior.webp',
     photos: [1, 2, 3, 4, 5, 6, 7].map((n) => ({
-      src: `/space-photos/interior-${n}.webp`,
+      src: `/images/space-photos/interior-${n}.webp`,
       alt: 'فضای داخلی',
     })),
   },
@@ -47,7 +47,7 @@ export const SPACES: Space[] = [
     description: 'نشستن زیر درخت نارنج در فصل بهار',
     coverImage: '/images/gallery/courtyard.webp',
     photos: [1, 2, 3, 4, 5, 6].map((n) => ({
-      src: `/space-photos/courtyard-${n}.webp`,
+      src: `/images/space-photos/courtyard-${n}.webp`,
       alt: 'حیاط مرکزی',
     })),
   },
@@ -57,7 +57,7 @@ export const SPACES: Space[] = [
     description: 'تماشای برشته‌کاری دانه‌ها از نزدیک',
     coverImage: '/images/gallery/roastery.webp',
     photos: [1, 2, 3, 4].map((n) => ({
-      src: `/space-photos/roastery-${n}.webp`,
+      src: `/images/space-photos/roastery-${n}.webp`,
       alt: 'رست‌خانه‌ی شیشه‌ای',
     })),
   },
@@ -67,7 +67,7 @@ export const SPACES: Space[] = [
     description: 'قفسه‌ای از شعر کلاسیک و مدرن فارسی',
     coverImage: '/images/gallery/library.webp',
     photos: [1, 2, 3, 4].map((n) => ({
-      src: `/space-photos/library-${n}.webp`,
+      src: `/images/space-photos/library-${n}.webp`,
       alt: 'گوشه‌ی کتاب',
     })),
   },
