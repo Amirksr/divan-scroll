@@ -24,8 +24,9 @@ import CartButton from './CartButton';
  */
 const NAV_LINKS = [
   { href: '/#hero', label: 'خانه' },
-  { href: '/about', label: 'درباره دیوان' },
   { href: '/menu', label: 'منوی کامل' },
+  { href: '/about', label: 'درباره دیوان' },
+  { href: '/contact', label: 'ارتباط با دیوان' },
 ];
 
 export default function Header() {
@@ -76,7 +77,7 @@ export default function Header() {
         </nav>
 
         <div className="site-header-actions">
-          <Link href="/#footer-contact" className="reserve-pill focus-ring">
+          <Link href="/contact" className="reserve-pill focus-ring">
             رزرو میز
           </Link>
 

@@ -3,6 +3,11 @@ export interface StoryValue {
   desc: string;
 }
 
+export interface TeamMember {
+  name: string;
+  role: string;
+}
+
 /**
  * Sourced from DivanCafe's messages/fa.json → about_page. English fields
  * kept alongside for a future bilingual toggle, but only the Farsi content
@@ -25,4 +30,10 @@ export const STORY = {
     { title: 'صنعتگری آهسته', desc: 'هر نوشیدنی با دست و با دقت آماده می‌شود.' },
     { title: 'دورهمی', desc: 'شب‌های شعرخوانی و میزبانی هنرمندان محلی.' },
   ] satisfies StoryValue[],
+  teamTitleFa: 'چهره‌های دیوان',
+  team: [
+    { name: 'سارا احمدی', role: 'سرآشپز قهوه و رست‌مستر' },
+    { name: 'امیرحسین رضایی', role: 'سرآشپز آشپزخانه' },
+    { name: 'نگار کریمی', role: 'مدیر میهمان‌داری' },
+  ] satisfies TeamMember[],
 };

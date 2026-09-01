@@ -16,6 +16,7 @@ export default function AboutStory() {
   const sectionRef = useRef<HTMLElement>(null);
   const paragraphRefs = useRef<Array<HTMLParagraphElement | null>>([]);
   const valueRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const teamRefs = useRef<Array<HTMLDivElement | null>>([]);
   const reducedMotion = useReducedMotion();
 
   useIsomorphicLayoutEffect(() => {
@@ -67,6 +68,22 @@ export default function AboutStory() {
             ),
         });
       }
+
+      // Team cards get their own batch, same reveal language as the value
+      // cards above, so the two grids read as one consistent motion system
+      // rather than two different scroll behaviors stacked on the page.
+      const teamCards = teamRefs.current.filter((el): el is HTMLDivElement => el !== null);
+      if (teamCards.length > 0) {
+        ScrollTrigger.batch(teamCards, {
+          start: 'top 85%',
+          onEnter: (batch) =>
+            gsap.fromTo(
+              batch,
+              { opacity: 0, y: 24 },
+              { opacity: 1, y: 0, duration: 0.9, ease: 'power2.out', stagger: 0.3 }
+            ),
+        });
+      }
     }, sectionRef);
 
     return () => ctx.revert();
@@ -103,9 +120,34 @@ export default function AboutStory() {
                 valueRefs.current[i] = el;
               }}
               className="about-value-card"
+              style={reducedMotion ? undefined : { opacity: 0 }}
             >
               <h3>{value.title}</h3>
               <p>{value.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="about-team">
+        <p className="about-team-title">{STORY.teamTitleFa}</p>
+        <div className="about-team-grid">
+          {STORY.team.map((member, i) => (
+            <div
+              key={member.name}
+              ref={(el) => {
+                teamRefs.current[i] = el;
+              }}
+              className="about-team-card"
+              style={reducedMotion ? undefined : { opacity: 0 }}
+            >
+              <span aria-hidden="true" className="about-team-avatar">
+                {member.name.slice(0, 1)}
+              </span>
+              <div>
+                <p className="about-team-name">{member.name}</p>
+                <p className="about-team-role">{member.role}</p>
+              </div>
             </div>
           ))}
         </div>
