@@ -34,17 +34,17 @@ export default function AboutStory() {
         scrollTrigger: {
           trigger: sectionRef.current,
           start: 'top top',
-          // Was '+=120%': with 3 paragraphs and a 0.3 crossfade, the third
-          // paragraph finishes fading in by ~77% progress and then just
-          // sits there, fully visible and unchanging, for the rest of the
-          // pin -- at 120vh that "settled" stretch alone was ~28vh of
-          // scrolling with no visual feedback before the values section
-          // below could even start appearing, which read as a dead gap
-          // between the story text and "آنچه به آن پایبندیم". Tightening
-          // to 95% keeps the same per-paragraph crossfade proportions
-          // (getParagraphOpacity is progress-based, not absolute-distance-
-          // based) while shrinking that trailing dead zone to ~22vh.
-          end: '+=95%',
+          // Was '+=120%', then '+=95%': with 3 paragraphs and a 0.3
+          // crossfade, the third paragraph finishes fading in by ~77%
+          // progress and then just sits there, fully visible and
+          // unchanging, for the rest of the pin. Even at 95% that
+          // "settled" stretch was still ~22vh of scrolling with no visual
+          // feedback before the values section could appear -- still read
+          // as a dead gap. Cutting further to 55% shrinks that same
+          // trailing stretch to ~13vh; per-paragraph crossfade
+          // proportions are still untouched either way
+          // (getParagraphOpacity is progress-based, not distance-based).
+          end: '+=55%',
           scrub: 0.5,
           pin: true,
           anticipatePin: 1,

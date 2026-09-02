@@ -124,6 +124,13 @@ export default function MobileNav() {
                 >
                   <Icon className="mobile-nav-item-icon" />
                   <span>{label}</span>
+                  {active && (
+                    // Ported from DivanCafe's MobileNav.tsx: a thin
+                    // rounded bar at the item's start edge (next to the
+                    // icon, since RTL's inline-start is the right side)
+                    // -- not just the background tint below.
+                    <span aria-hidden="true" className="mobile-nav-item-active-bar" />
+                  )}
                 </Link>
               </li>
             );

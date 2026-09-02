@@ -67,11 +67,16 @@ describe('<MobileNav />', () => {
     jest.useRealTimers();
   });
 
-  it('marks the current route as active among the nav items', () => {
+  it('marks the current route as active among the nav items, with the colored indicator bar', () => {
     render(<MobileNav />);
     fireEvent.click(screen.getByRole('button', { name: 'باز کردن منو' }));
 
     const homeLink = screen.getByRole('link', { name: 'خانه' });
     expect(homeLink.className).toContain('mobile-nav-item--active');
+    expect(homeLink.querySelector('.mobile-nav-item-active-bar')).not.toBeNull();
+
+    const menuLink = screen.getByRole('link', { name: 'منوی کامل' });
+    expect(menuLink.className).not.toContain('mobile-nav-item--active');
+    expect(menuLink.querySelector('.mobile-nav-item-active-bar')).toBeNull();
   });
 });
