@@ -4,6 +4,7 @@ import { useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { toTelHref } from '@/lib/format';
+import { buildMapEmbedUrl } from '@/lib/map-embed';
 import ContactForm from './ContactForm';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useIsomorphicLayoutEffect } from '@/hooks/useIsomorphicLayoutEffect';
@@ -21,6 +22,9 @@ const PHONE = '۰۳۱-۳۲۲۰۱۵۵۵';
 const PHONE_INTL = '+98 31 3220 1555';
 const EMAIL = 'hello@divan-cafe.ir';
 const MAP_NOTE = 'روی نقشه، دیوان درست پشت مسجد شیخ لطف‌الله قرار دارد.';
+// Fictional street/alley in ADDRESS won't geocode; embed the real,
+// recognizable landmark the note above already points to instead.
+const MAP_QUERY = 'Sheikh Lotfollah Mosque, Isfahan, Iran';
 
 export default function ContactSection() {
   const gridRef = useRef<HTMLDivElement>(null);
@@ -75,12 +79,13 @@ export default function ContactSection() {
               </li>
             </ul>
 
-            <div className="contact-map" aria-hidden="true">
-              <svg viewBox="0 0 200 120" fill="none">
-                <path d="M0 90 Q50 60 100 90 T200 80" stroke="currentColor" strokeWidth="1" />
-                <path d="M0 40 Q60 70 120 40 T200 50" stroke="currentColor" strokeWidth="1" />
-                <circle cx="120" cy="55" r="5" fill="var(--gold)" />
-              </svg>
+            <div className="contact-map">
+              <iframe
+                title="نقشه‌ی موقعیت دیوان"
+                src={buildMapEmbedUrl(MAP_QUERY)}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
             </div>
             <p className="contact-map-note">{MAP_NOTE}</p>
           </div>

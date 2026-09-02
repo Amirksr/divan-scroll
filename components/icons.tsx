@@ -106,3 +106,52 @@ export const categoryIcons = {
   pastry: CroissantIcon,
   brunch: BowlIcon,
 } as const;
+
+/* ---------- Off-canvas nav icons (ported from DivanCafe's icons.tsx) ---------- */
+
+export function HomeIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4 11.5 12 4l8 7.5" />
+      <path d="M6 10v9h12v-9" />
+      <path d="M10 19v-5h4v5" />
+    </svg>
+  );
+}
+
+export function MenuDocIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M6 3.5h9l3 3v14a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5V4a.5.5 0 0 1 .5-.5Z" />
+      <path d="M15 3.5V7h3.5" />
+      <path d="M8.5 12h7M8.5 15h7M8.5 9h3" />
+    </svg>
+  );
+}
+
+export function PeopleIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="9" cy="8.5" r="3" />
+      <path d="M3.5 19c.7-3.3 3-5 5.5-5s4.8 1.7 5.5 5" />
+      <circle cx="17" cy="9.5" r="2.3" />
+      <path d="M15.5 14.2c1.9.3 3.5 1.7 4 4.3" />
+    </svg>
+  );
+}
+
+export function PhoneIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M5 4.5h3.2l1.3 4-1.9 1.5a11 11 0 0 0 5.4 5.4l1.5-1.9 4 1.3V18a1.5 1.5 0 0 1-1.6 1.5A15 15 0 0 1 3.5 6.1 1.5 1.5 0 0 1 5 4.5Z" />
+    </svg>
+  );
+}
+
+export function CloseIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M6 6l12 12M18 6L6 18" />
+    </svg>
+  );
+}

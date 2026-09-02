@@ -1,11 +1,9 @@
 import { toTelHref } from '@/lib/format';
+import NewsletterForm from './NewsletterForm';
 
 /**
  * Scoped port of DivanCafe's src/components/Footer.tsx. Tagline, address,
  * phone, and email are the real values from DivanCafe's messages/fa.json.
- * Dropped: the newsletter signup form (NewsletterForm.tsx posts to a real
- * backend endpoint that doesn't exist in this standalone repo — showing a
- * form that silently does nothing would be worse than not showing one).
  */
 const YEAR = new Date().getFullYear();
 const PHONE = '۰۳۱-۳۲۲۰۱۵۵۵';
@@ -44,6 +42,12 @@ export default function Footer() {
                 <a href={`mailto:${EMAIL}`} className="focus-ring">{EMAIL}</a>
               </li>
             </ul>
+          </div>
+
+          <div>
+            <p className="footer-heading">خبرنامه</p>
+            <p className="footer-newsletter-desc">از فنجان‌های تازه و شب‌های شعرخوانی باخبر شوید.</p>
+            <NewsletterForm />
           </div>
         </div>
 
