@@ -1,0 +1,108 @@
+{
+  "meta": {
+    "title": "Divan | Coffeehouse & Kitchen",
+    "description": "Divan is a coffeehouse in Isfahan pairing specialty coffee with the heritage of Persian ghahveh-khaneh culture and poetry."
+  },
+  "nav": {
+    "home": "Home",
+    "menu": "Full menu",
+    "about": "About Divan",
+    "contact": "Contact",
+    "reserve": "Reserve a table",
+    "cart": "Cart"
+  },
+  "hero": {
+    "eyebrow": "Coffeehouse & Kitchen — Est. 2022",
+    "title": "Divan",
+    "subtitle": "Every cup, a verse in our daily ledger",
+    "description": "At Divan, brewing coffee is treated like reading a ghazal — slow, precise, and full of meaning. Fresh-roasted beans, house-baked bread, and a room built for staying a while.",
+    "scroll_cue": "Scroll"
+  },
+  "stats": {
+    "title": "Divan, in numbers",
+    "cups": "cups poured a year",
+    "beans": "origin countries",
+    "rating": "average rating",
+    "years": "years of craft"
+  },
+  "categories": {
+    "eyebrow": "The Ledger",
+    "title": "Browse the menu",
+    "description": "From single-origin espresso to a full Persian breakfast — everything has its page in this ledger."
+  },
+  "gallery": {
+    "eyebrow": "The Photo Ledger",
+    "title": "A look inside Divan",
+    "description": "Light through old window frames, steam off the cup, and the low hum of conversation."
+  },
+  "ambiance": {
+    "eyebrow": "The Room",
+    "title": "A house built for staying",
+    "description": "Divan lives inside a restored Isfahani house — brick vaults, a central courtyard, and light that changes color by the hour. A place to work, meet friends, or just sit with a book."
+  },
+  "hours": {
+    "title": "Opening hours",
+    "everyday": "Saturday — Thursday",
+    "weekend": "Friday",
+    "everyday_time": "7:30 AM — 11:00 PM",
+    "weekend_time": "9:00 AM — Midnight"
+  },
+  "footer": {
+    "tagline": "Divan — a ledger of coffee, poetry, and long conversations.",
+    "quick_links": "Quick links",
+    "contact_info": "Contact",
+    "address": "Chaharbagh Abbasi St., Narenjestan Alley No. 12, Isfahan",
+    "phone": "+98 31 3220 1555",
+    "phone_intl": "+98 31 3220 1555",
+    "email": "hello@divan-cafe.ir",
+    "newsletter": "Newsletter",
+    "newsletter_desc": "Fresh cups and poetry nights, straight to your inbox.",
+    "newsletter_placeholder": "Your email",
+    "newsletter_cta": "Subscribe",
+    "rights": "All rights reserved."
+  },
+  "menu_page": {
+    "eyebrow": "The Full Ledger",
+    "title": "Divan Menu",
+    "description": "Every drink and dish at Divan, sorted like the verses of a long ghazal."
+  },
+  "about_page": {
+    "eyebrow": "The Divan story"
+  },
+  "contact_page": {
+    "eyebrow": "Get in touch",
+    "title": "Find Divan",
+    "description": "For table reservations, private events, or just to say hello — leave a message or call us.",
+    "form": {
+      "name": "Your name",
+      "email": "Email",
+      "phone": "Phone",
+      "message": "Your message",
+      "submit": "Send message",
+      "party_size": "Party size",
+      "date": "Date",
+      "reserve_title": "Reserve a table",
+      "required": "This field is required.",
+      "invalid_email": "Enter a valid email.",
+      "submitted_headline": "✓ Message received",
+      "submitted_body": "We'll be in touch soon to confirm your reservation."
+    },
+    "info_title": "Reach us",
+    "map_note": "On the map, Divan sits just behind Sheikh Lotfollah Mosque."
+  },
+  "mobile_nav": {
+    "open": "Open menu",
+    "close": "Close menu",
+    "close_panel": "Close navigation panel",
+    "aria_label": "Main navigation"
+  },
+  "theme": {
+    "to_light": "Switch to light mode",
+    "to_dark": "Switch to dark mode"
+  },
+  "language": {
+    "label": "Language",
+    "fa": "فارسی",
+    "en": "English"
+  }
+}
