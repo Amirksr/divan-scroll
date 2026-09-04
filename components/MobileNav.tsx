@@ -6,20 +6,9 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import Logo from './Logo';
 import ThemeToggle from './ThemeToggle';
+import LanguageSwitcher from './LanguageSwitcher';
 import { HomeIcon, MenuDocIcon, PeopleIcon, PhoneIcon, CloseIcon } from './icons';
-
-interface NavLink {
-  href: string;
-  label: string;
-  Icon: typeof HomeIcon;
-}
-
-const LINKS: NavLink[] = [
-  { href: '/#hero', label: 'خانه', Icon: HomeIcon },
-  { href: '/menu', label: 'منوی کامل', Icon: MenuDocIcon },
-  { href: '/about', label: 'درباره دیوان', Icon: PeopleIcon },
-  { href: '/contact', label: 'ارتباط با دیوان', Icon: PhoneIcon },
-];
+import { translate, type Locale, type Messages } from '@/lib/i18n';
 
 /** Delay between an item lighting up and the panel actually closing/navigating. */
 const SELECT_DELAY_MS = 220;
@@ -28,24 +17,33 @@ const SELECT_DELAY_MS = 220;
  * Ported from DivanCafe's src/components/MobileNav.tsx. Same off-canvas
  * mechanics (portal to <body>, backdrop, slide-in panel, staggered
  * select-then-navigate delay, background-scroll lock) and same panel
- * contents (nav links, ThemeToggle, reserve CTA) -- adapted to
- * divan-scroll's flat routes (no /{locale} prefix) and this project's
- * plain CSS instead of Tailwind. A LanguageSwitcher will slot in next to
- * ThemeToggle here once i18n routing lands (see the reserved spot below);
- * this project is still Farsi-only for now.
+ * contents (nav links, ThemeToggle, LanguageSwitcher, reserve CTA) --
+ * adapted to this project's plain CSS instead of Tailwind. Now locale-
+ * aware: routes are /{locale}/... and LanguageSwitcher's reserved spot
+ * is finally filled in.
  *
  * Also keeps two accessibility affordances that weren't in the original:
  * Escape-to-close and locking that only while open (DivanCafe's backdrop
  * already covers "click outside" -- clicking it closes the panel just
  * like clicking outside would).
  */
-export default function MobileNav() {
+export default function MobileNav({ locale, dict }: { locale: Locale; dict: Messages }) {
   const [open, setOpen] = useState(false);
   const [pendingHref, setPendingHref] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const toggleRef = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
   const router = useRouter();
+  const t = (key: string) => translate(dict, key);
+  const prefix = `/${locale}`;
+
+  const links = [
+    { href: `${prefix}#hero`, label: t('nav.home'), Icon: HomeIcon },
+    { href: `${prefix}/menu`, label: t('nav.menu'), Icon: MenuDocIcon },
+    { href: `${prefix}/about`, label: t('nav.about'), Icon: PeopleIcon },
+    { href: `${prefix}/contact`, label: t('nav.contact'), Icon: PhoneIcon },
+  ];
+  const contactHref = `${prefix}/contact`;
 
   // The backdrop/panel are portaled straight to <body> instead of rendering
   // in place, same reasoning as DivanCafe's original: an ancestor with a
@@ -70,7 +68,7 @@ export default function MobileNav() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  const isActive = (href: string) => (href === '/#hero' ? pathname === '/' : pathname?.startsWith(href));
+  const isActive = (href: string) => (href === `${prefix}#hero` ? pathname === prefix : pathname?.startsWith(href));
 
   function close() {
     setOpen(false);
@@ -93,15 +91,14 @@ export default function MobileNav() {
 
       <nav
         id="mobile-nav-panel"
-        aria-label="ناوبری اصلی"
+        aria-label={t('mobile_nav.aria_label')}
         className={open ? 'mobile-nav-drawer mobile-nav-drawer--open' : 'mobile-nav-drawer'}
       >
         <div className="mobile-nav-drawer-top">
-          <Logo wordmark="دیوان" />
+          <Logo wordmark={dict.hero.title} isFa={locale === 'fa'} />
           <div className="mobile-nav-drawer-top-actions">
-            <ThemeToggle />
-            {/* Reserved for LanguageSwitcher once i18n routing lands. */}
-            <button type="button" onClick={close} aria-label="بستن پنل ناوبری" className="mobile-nav-close focus-ring">
+            <ThemeToggle dict={dict} />
+            <button type="button" onClick={close} aria-label={t('mobile_nav.close_panel')} className="mobile-nav-close focus-ring">
               <CloseIcon className="mobile-nav-close-icon" />
             </button>
           </div>
@@ -110,7 +107,7 @@ export default function MobileNav() {
         <div className="mobile-nav-divider" />
 
         <ul className="mobile-nav-list">
-          {LINKS.map(({ href, label, Icon }) => {
+          {links.map(({ href, label, Icon }) => {
             const active = pendingHref === href || (!pendingHref && isActive(href));
             return (
               <li key={href}>
@@ -137,17 +134,20 @@ export default function MobileNav() {
           })}
         </ul>
 
-        <div className="mobile-nav-cta-row">
+        <div className="mobile-nav-footer">
+          <div className="mobile-nav-lang-row">
+            <LanguageSwitcher locale={locale} />
+          </div>
           <Link
-            href="/contact"
+            href={contactHref}
             onClick={(e) => {
               e.preventDefault();
-              selectLink('/contact');
+              selectLink(contactHref);
             }}
             className="mobile-nav-cta focus-ring"
           >
-            رزرو میز
-            <span aria-hidden="true">←</span>
+            {t('nav.reserve')}
+            <span aria-hidden="true">{locale === 'fa' ? '←' : '→'}</span>
           </Link>
         </div>
       </nav>
@@ -160,7 +160,7 @@ export default function MobileNav() {
         ref={toggleRef}
         type="button"
         className="mobile-nav-toggle focus-ring"
-        aria-label={open ? 'بستن منو' : 'باز کردن منو'}
+        aria-label={open ? t('mobile_nav.close') : t('mobile_nav.open')}
         aria-expanded={open}
         aria-controls="mobile-nav-panel"
         onClick={() => setOpen((v) => !v)}

@@ -7,20 +7,26 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
   CATEGORY_META,
   CATEGORIES_EYEBROW,
+  CATEGORIES_EYEBROW_EN,
   CATEGORIES_TITLE,
+  CATEGORIES_TITLE_EN,
   CATEGORIES_DESC,
+  CATEGORIES_DESC_EN,
   getCategoryItemCount,
   hasCategoryContent,
 } from '@/lib/categories-data';
 import { categoryIcons } from './icons';
+import { translate, type Locale, type Messages } from '@/lib/i18n';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useIsomorphicLayoutEffect } from '@/hooks/useIsomorphicLayoutEffect';
 
 gsap.registerPlugin(ScrollTrigger);
 
-export default function Categories() {
+export default function Categories({ locale, dict }: { locale: Locale; dict: Messages }) {
   const gridRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
+  const t = (key: string) => translate(dict, key);
+  const isFa = locale === 'fa';
 
   useIsomorphicLayoutEffect(() => {
     if (!gridRef.current || reducedMotion) return;
@@ -43,26 +49,28 @@ export default function Categories() {
 
   return (
     <section className="categories" id="categories">
-      <p className="eyebrow-static">{CATEGORIES_EYEBROW}</p>
-      <h2 className="categories-title">{CATEGORIES_TITLE}</h2>
-      <p className="categories-desc">{CATEGORIES_DESC}</p>
+      <p className="eyebrow-static">{isFa ? CATEGORIES_EYEBROW : CATEGORIES_EYEBROW_EN}</p>
+      <h2 className="categories-title">{isFa ? CATEGORIES_TITLE : CATEGORIES_TITLE_EN}</h2>
+      <p className="categories-desc">{isFa ? CATEGORIES_DESC : CATEGORIES_DESC_EN}</p>
 
       <div ref={gridRef} className="categories-grid">
         {CATEGORY_META.map((cat) => {
           const count = getCategoryItemCount(cat.slug);
           const available = hasCategoryContent(cat.slug);
           const Icon = categoryIcons[cat.slug];
+          const name = isFa ? cat.name : cat.nameEn;
+          const unit = isFa ? cat.unit : cat.unitEn;
           const card = (
             <div
               className={available ? 'category-card' : 'category-card category-card--soon'}
               style={reducedMotion ? undefined : { opacity: 0 }}
             >
               <Icon aria-hidden="true" className="category-icon" />
-              <h3>{cat.name}</h3>
+              <h3>{name}</h3>
               <p>
                 {available
-                  ? `${count.toLocaleString('fa-IR')} ${cat.unit}`
-                  : 'به‌زودی'}
+                  ? `${count.toLocaleString(isFa ? 'fa-IR' : 'en-US')} ${unit}`
+                  : t('common.coming_soon')}
               </p>
             </div>
           );
@@ -70,9 +78,9 @@ export default function Categories() {
           return available ? (
             <Link
               key={cat.slug}
-              href={`/menu#cat-${cat.slug}`}
+              href={`/${locale}/menu#cat-${cat.slug}`}
               className="category-card-link focus-ring"
-              aria-label={`مشاهده‌ی دسته‌ی ${cat.name}`}
+              aria-label={t('common.view_category').replace('{name}', name)}
             >
               {card}
             </Link>

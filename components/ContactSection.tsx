@@ -8,27 +8,18 @@ import { buildMapEmbedUrl } from '@/lib/map-embed';
 import ContactForm from './ContactForm';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useIsomorphicLayoutEffect } from '@/hooks/useIsomorphicLayoutEffect';
+import { translate, type Locale, type Messages } from '@/lib/i18n';
 
 gsap.registerPlugin(ScrollTrigger);
 
-/**
- * Same real DivanCafe values Footer.tsx uses — duplicated here rather than
- * imported, matching Footer.tsx's own convention (it hardcodes these
- * inline with an explanatory comment rather than pulling from a shared
- * lib module).
- */
-const ADDRESS = 'اصفهان، خیابان چهارباغ عباسی، کوچه‌ی نارنجستان، پلاک ۱۲';
-const PHONE = '۰۳۱-۳۲۲۰۱۵۵۵';
-const PHONE_INTL = '+98 31 3220 1555';
-const EMAIL = 'hello@divan-cafe.ir';
-const MAP_NOTE = 'روی نقشه، دیوان درست پشت مسجد شیخ لطف‌الله قرار دارد.';
-// Fictional street/alley in ADDRESS won't geocode; embed the real,
-// recognizable landmark the note above already points to instead.
+// Fictional street/alley in dict.footer.address won't geocode; embed the
+// real, recognizable landmark contact_page.map_note already points to.
 const MAP_QUERY = 'Sheikh Lotfollah Mosque, Isfahan, Iran';
 
-export default function ContactSection() {
+export default function ContactSection({ locale, dict }: { locale: Locale; dict: Messages }) {
   const gridRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
+  const t = (key: string) => translate(dict, key);
 
   useIsomorphicLayoutEffect(() => {
     if (!gridRef.current || reducedMotion) return;
@@ -52,42 +43,40 @@ export default function ContactSection() {
   return (
     <section className="contact-section" id="contact">
       <div className="contact-section-inner">
-        <p className="eyebrow-static">در تماس باشید</p>
-        <h1 className="contact-title">دیوان را پیدا کنید</h1>
-        <p className="contact-description">
-          برای رزرو میز، رویدادهای خصوصی یا فقط یک سلام، پیام بگذارید یا با ما تماس بگیرید.
-        </p>
+        <p className="eyebrow-static">{t('contact_page.eyebrow')}</p>
+        <h1 className="contact-title">{t('contact_page.title')}</h1>
+        <p className="contact-description">{t('contact_page.description')}</p>
 
         <div ref={gridRef} className="contact-grid">
           <div className="contact-reveal" style={reducedMotion ? undefined : { opacity: 0 }}>
-            <ContactForm />
+            <ContactForm dict={dict} />
           </div>
 
           <div className="contact-reveal" style={reducedMotion ? undefined : { opacity: 0 }}>
-            <h2 className="contact-info-title">راه‌های ارتباطی</h2>
+            <h2 className="contact-info-title">{t('contact_page.info_title')}</h2>
             <ul className="contact-info-list">
-              <li>{ADDRESS}</li>
+              <li>{dict.footer.address}</li>
               <li dir="ltr">
-                <a href={toTelHref(PHONE_INTL)} className="focus-ring">
-                  {PHONE}
+                <a href={toTelHref(dict.footer.phone_intl)} className="focus-ring">
+                  {dict.footer.phone}
                 </a>
               </li>
               <li dir="ltr">
-                <a href={`mailto:${EMAIL}`} className="focus-ring">
-                  {EMAIL}
+                <a href={`mailto:${dict.footer.email}`} className="focus-ring">
+                  {dict.footer.email}
                 </a>
               </li>
             </ul>
 
             <div className="contact-map">
               <iframe
-                title="نقشه‌ی موقعیت دیوان"
+                title={locale === 'fa' ? 'نقشه‌ی موقعیت دیوان' : "Map of Divan's location"}
                 src={buildMapEmbedUrl(MAP_QUERY)}
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
               />
             </div>
-            <p className="contact-map-note">{MAP_NOTE}</p>
+            <p className="contact-map-note">{t('contact_page.map_note')}</p>
           </div>
         </div>
       </div>

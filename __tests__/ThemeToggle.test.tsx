@@ -1,5 +1,8 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import ThemeToggle from '../components/ThemeToggle';
+import { getMessages } from '../lib/i18n';
+
+const dict = getMessages('fa');
 
 describe('<ThemeToggle />', () => {
   beforeEach(() => {
@@ -12,13 +15,13 @@ describe('<ThemeToggle />', () => {
   });
 
   it('resolves to dark after mount and shows a sun icon', async () => {
-    render(<ThemeToggle />);
+    render(<ThemeToggle dict={dict} />);
     await waitFor(() => expect(screen.getByRole('button')).toHaveAttribute('data-theme-ready', 'true'));
     expect(screen.getByRole('button')).toHaveAccessibleName('رفتن به حالت روشن');
   });
 
   it('switches to light on click, updating the DOM class and storage', async () => {
-    render(<ThemeToggle />);
+    render(<ThemeToggle dict={dict} />);
     await waitFor(() => expect(screen.getByRole('button')).toHaveAttribute('data-theme-ready', 'true'));
 
     fireEvent.click(screen.getByRole('button'));
@@ -29,7 +32,7 @@ describe('<ThemeToggle />', () => {
   });
 
   it('toggles back to dark on a second click', async () => {
-    render(<ThemeToggle />);
+    render(<ThemeToggle dict={dict} />);
     await waitFor(() => expect(screen.getByRole('button')).toHaveAttribute('data-theme-ready', 'true'));
 
     fireEvent.click(screen.getByRole('button'));
@@ -37,5 +40,11 @@ describe('<ThemeToggle />', () => {
 
     expect(document.documentElement.classList.contains('light')).toBe(false);
     expect(window.localStorage.getItem('theme')).toBe('dark');
+  });
+
+  it('renders English aria-labels for the en dictionary', async () => {
+    render(<ThemeToggle dict={getMessages('en')} />);
+    await waitFor(() => expect(screen.getByRole('button')).toHaveAttribute('data-theme-ready', 'true'));
+    expect(screen.getByRole('button')).toHaveAccessibleName('Switch to light mode');
   });
 });

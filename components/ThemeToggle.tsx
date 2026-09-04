@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { applyTheme, resolveInitialTheme, type Theme } from '@/lib/theme';
+import { translate, type Messages } from '@/lib/i18n';
 
-export default function ThemeToggle() {
+export default function ThemeToggle({ dict }: { dict: Messages }) {
   const [theme, setTheme] = useState<Theme | null>(null);
 
   // Resolve the real theme only after mount so the server-rendered markup
@@ -29,7 +30,7 @@ export default function ThemeToggle() {
       type="button"
       onClick={toggle}
       className="theme-toggle focus-ring"
-      aria-label={theme === 'light' ? 'رفتن به حالت تیره' : 'رفتن به حالت روشن'}
+      aria-label={theme === 'light' ? translate(dict, 'theme.to_dark') : translate(dict, 'theme.to_light')}
       data-theme-ready={theme !== null}
     >
       {theme === 'light' ? <MoonIcon /> : <SunIcon />}

@@ -12,6 +12,7 @@ import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useIsomorphicLayoutEffect } from '@/hooks/useIsomorphicLayoutEffect';
 import { lenisInstance } from '@/lib/lenis-instance';
 import MenuItemModal from './MenuItemModal';
+import { translate, type Locale, type Messages } from '@/lib/i18n';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -20,7 +21,9 @@ const items = availableCategories.flatMap((cat) =>
   MENU_ITEMS.filter((item) => item.category === cat.slug)
 );
 
-export default function FullMenuScroll() {
+export default function FullMenuScroll({ locale, dict }: { locale: Locale; dict: Messages }) {
+  const t = (key: string) => translate(dict, key);
+  const isFa = locale === 'fa';
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -222,7 +225,7 @@ export default function FullMenuScroll() {
       <div
         className={'full-menu-tabs' + (reducedMotion ? ' full-menu-tabs--sticky' : '')}
         role="group"
-        aria-label="پرش به دسته‌بندی منو"
+        aria-label={t('menu_page.jump_to_category')}
       >
         {CATEGORY_META.map((cat) => {
           const available = availableCategories.some((c) => c.slug === cat.slug);
@@ -237,7 +240,7 @@ export default function FullMenuScroll() {
               className={'full-menu-tab focus-ring' + (isActive ? ' full-menu-tab--active' : '')}
               onClick={() => handleTabClick(cat.slug)}
             >
-              {cat.name}
+              {isFa ? cat.name : cat.nameEn}
             </button>
           );
         })}
@@ -256,7 +259,7 @@ export default function FullMenuScroll() {
                 type="button"
                 className="h-card"
                 key={item.id}
-                dir="rtl"
+                dir={isFa ? 'rtl' : 'ltr'}
                 ref={
                   isFirstInCategory
                     ? (el) => {
@@ -269,16 +272,21 @@ export default function FullMenuScroll() {
               >
                 <Image
                   src={item.image}
-                  alt={item.labelFa}
+                  alt={isFa ? item.labelFa : item.labelEn}
                   fill
                   sizes="(min-width: 1280px) 300px, 26vw"
                   style={{ objectFit: 'cover' }}
                   priority={i < 3}
                 />
                 <div className="h-scrim" />
-                <span className="h-cat">{CATEGORY_META.find((c) => c.slug === item.category)?.name}</span>
-                <span className="h-price">{formatToman(item.price)}</span>
-                <span className="h-label">{item.labelFa}</span>
+                <span className="h-cat">
+                  {(() => {
+                    const cat = CATEGORY_META.find((c) => c.slug === item.category);
+                    return cat ? (isFa ? cat.name : cat.nameEn) : undefined;
+                  })()}
+                </span>
+                <span className="h-price">{formatToman(item.price, locale)}</span>
+                <span className="h-label">{isFa ? item.labelFa : item.labelEn}</span>
               </button>
             );
           })}
@@ -293,7 +301,7 @@ export default function FullMenuScroll() {
         with the still-settling cards and jumping. This is plain
         unpinned document flow, no GSAP timing involved. */}
     <div className="full-menu-end-spacer" aria-hidden="true" />
-    <MenuItemModal item={selectedItem} onClose={() => setSelectedItem(null)} />
+    <MenuItemModal item={selectedItem} onClose={() => setSelectedItem(null)} locale={locale} dict={dict} />
     </>
   );
 }

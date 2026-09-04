@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { KeyboardEvent, TouchEvent } from 'react';
 import Image from 'next/image';
 import type { Space } from '@/lib/spaces-data';
+import { translate, type Locale, type Messages } from '@/lib/i18n';
 
 /**
  * Full-bleed photo viewer opened from a space card. RTL note: since the
@@ -15,10 +16,16 @@ import type { Space } from '@/lib/spaces-data';
 export default function SpaceLightbox({
   space,
   onClose,
+  locale,
+  dict,
 }: {
   space: Space | null;
   onClose: () => void;
+  locale: Locale;
+  dict: Messages;
 }) {
+  const t = (key: string) => translate(dict, key);
+  const isFa = locale === 'fa';
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [index, setIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
@@ -73,26 +80,27 @@ export default function SpaceLightbox({
   };
 
   const current = space.photos[index];
+  const title = isFa ? space.title : space.titleEn;
 
   return (
     <dialog
       ref={dialogRef}
       className="space-lightbox"
       onKeyDown={onKeyDown}
-      aria-label={space.title}
+      aria-label={title}
     >
-      <div dir="rtl" className="space-lightbox-content">
+      <div dir={isFa ? 'rtl' : 'ltr'} className="space-lightbox-content">
         <button
           type="button"
           className="space-lightbox-close"
           onClick={() => dialogRef.current?.close()}
-          aria-label="بستن"
+          aria-label={t('space_page.close')}
         >
           ✕
         </button>
 
-        <p className="space-lightbox-eyebrow">نمای نزدیک</p>
-        <h3 className="space-lightbox-title">{space.title}</h3>
+        <p className="space-lightbox-eyebrow">{t('space_page.eyebrow')}</p>
+        <h3 className="space-lightbox-title">{title}</h3>
 
         <div
           className="space-lightbox-stage"
@@ -104,7 +112,7 @@ export default function SpaceLightbox({
               type="button"
               className="space-lightbox-nav space-lightbox-nav--prev"
               onClick={goPrev}
-              aria-label="عکس قبلی"
+              aria-label={t('space_page.prev_photo')}
             >
               ‹
             </button>
@@ -115,7 +123,7 @@ export default function SpaceLightbox({
           <div className="space-lightbox-image-wrap" key={index}>
             <Image
               src={current.src}
-              alt={current.alt}
+              alt={isFa ? current.alt : current.altEn}
               fill
               sizes="(min-width: 1024px) 900px, 100vw"
               className="space-lightbox-image"
@@ -127,7 +135,7 @@ export default function SpaceLightbox({
               type="button"
               className="space-lightbox-nav space-lightbox-nav--next"
               onClick={goNext}
-              aria-label="عکس بعدی"
+              aria-label={t('space_page.next_photo')}
             >
               ›
             </button>
@@ -135,14 +143,14 @@ export default function SpaceLightbox({
         </div>
 
         {count > 1 && (
-          <div className="space-lightbox-filmstrip" role="tablist" aria-label="عکس‌های بیشتر">
+          <div className="space-lightbox-filmstrip" role="tablist" aria-label={t('space_page.more_photos')}>
             {space.photos.map((photo, i) => (
               <button
                 key={photo.src}
                 type="button"
                 role="tab"
                 aria-selected={i === index}
-                aria-label={`عکس ${i + 1} از ${count}`}
+                aria-label={t('space_page.photo_of').replace('{i}', String(i + 1)).replace('{count}', String(count))}
                 className="space-lightbox-thumb"
                 data-active={i === index}
                 onClick={() => goTo(i)}

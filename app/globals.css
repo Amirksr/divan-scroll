@@ -1078,9 +1078,13 @@ body {
 }
 .logo-wordmark {
   font-family: var(--font-fa);
+  font-weight: 400;
   font-size: 1.25rem;
   letter-spacing: 0.04em;
   color: var(--parchment);
+}
+.logo-wordmark--en {
+  font-family: var(--font-display);
 }
 
 .site-nav {
@@ -1300,8 +1304,16 @@ body {
   background: var(--copper-bright);
 }
 
-.mobile-nav-cta-row {
+.mobile-nav-footer {
   padding: 0 1.25rem 1.5rem;
+}
+.mobile-nav-lang-row {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  border-top: 1px solid var(--line);
+  padding-top: 1rem;
+  margin-bottom: 1rem;
 }
 .mobile-nav-cta {
   display: flex;
@@ -2398,4 +2410,27 @@ body {
   margin-top: 0.75rem;
   font-size: 0.75rem;
   color: rgb(var(--parchment-rgb) / 0.5);
+}
+
+/* ---------- Language switcher (ported from DivanCafe's LanguageSwitcher.tsx) ---------- */
+.language-switcher {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  font-size: 0.8rem;
+}
+.language-switcher-sep {
+  margin: 0 0.25rem;
+  color: rgb(var(--parchment-rgb) / 0.35);
+}
+.language-switcher-link {
+  color: rgb(var(--parchment-rgb) / 0.6);
+  text-decoration: none;
+  letter-spacing: 0.02em;
+}
+.language-switcher-link:hover {
+  color: var(--parchment);
+}
+.language-switcher-link--active {
+  color: var(--gold);
 }

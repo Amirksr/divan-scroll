@@ -30,6 +30,11 @@
     "title": "Browse the menu",
     "description": "From single-origin espresso to a full Persian breakfast — everything has its page in this ledger."
   },
+  "popular": {
+    "eyebrow": "Selected Verses",
+    "title": "Most loved",
+    "view_all": "See the full menu"
+  },
   "gallery": {
     "eyebrow": "The Photo Ledger",
     "title": "A look inside Divan",
@@ -38,7 +43,8 @@
   "ambiance": {
     "eyebrow": "The Room",
     "title": "A house built for staying",
-    "description": "Divan lives inside a restored Isfahani house — brick vaults, a central courtyard, and light that changes color by the hour. A place to work, meet friends, or just sit with a book."
+    "description": "Divan lives inside a restored Isfahani house — brick vaults, a central courtyard, and light that changes color by the hour. A place to work, meet friends, or just sit with a book.",
+    "photo_count": "{count} photos"
   },
   "hours": {
     "title": "Opening hours",
@@ -59,12 +65,14 @@
     "newsletter_desc": "Fresh cups and poetry nights, straight to your inbox.",
     "newsletter_placeholder": "Your email",
     "newsletter_cta": "Subscribe",
-    "rights": "All rights reserved."
+    "rights": "All rights reserved.",
+    "made_by": "Designed & built with ❤"
   },
   "menu_page": {
     "eyebrow": "The Full Ledger",
     "title": "Divan Menu",
-    "description": "Every drink and dish at Divan, sorted like the verses of a long ghazal."
+    "description": "Every drink and dish at Divan, sorted like the verses of a long ghazal.",
+    "jump_to_category": "Jump to menu category"
   },
   "about_page": {
     "eyebrow": "The Divan story"
@@ -99,6 +107,42 @@
   "theme": {
     "to_light": "Switch to light mode",
     "to_dark": "Switch to dark mode"
+  },
+  "common": {
+    "toman": "Toman",
+    "new": "New",
+    "vegetarian": "Vegetarian",
+    "popular": "Popular",
+    "coming_soon": "Coming soon",
+    "view_category": "View the {name} category"
+  },
+  "quick_view": {
+    "close": "Close",
+    "quantity": "Quantity",
+    "decrease_qty": "Decrease quantity",
+    "increase_qty": "Increase quantity",
+    "add_to_cart": "Add to cart",
+    "added": "Added to cart ✓",
+    "in_cart": "{count} of this item in your cart"
+  },
+  "space_page": {
+    "eyebrow": "A closer look",
+    "close": "Close",
+    "prev_photo": "Previous photo",
+    "next_photo": "Next photo",
+    "more_photos": "More photos",
+    "photo_of": "Photo {i} of {count}"
+  },
+  "cart": {
+    "aria_label": "Cart",
+    "aria_label_with_count": "Cart ({count} items)",
+    "empty": "Your cart is empty",
+    "quantity": "Quantity",
+    "decrease_qty": "Decrease quantity",
+    "increase_qty": "Increase quantity",
+    "remove": "Remove",
+    "remove_item": "Remove {name} from cart",
+    "total": "Total"
   },
   "language": {
     "label": "Language",

@@ -11,16 +11,19 @@ import { getHorizontalScrollDistance, getCachedByWidth, type WidthCachedValue } 
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useIsomorphicLayoutEffect } from '@/hooks/useIsomorphicLayoutEffect';
 import MenuItemModal from './MenuItemModal';
+import { translate, type Locale, type Messages } from '@/lib/i18n';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const items = getFeaturedItems();
 
-export default function FeaturedMenu() {
+export default function FeaturedMenu({ locale, dict }: { locale: Locale; dict: Messages }) {
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
+  const t = (key: string) => translate(dict, key);
+  const isFa = locale === 'fa';
   // Caches the pin distance by viewport width -- see FullMenuScroll.tsx
   // and getCachedByWidth's doc comment for the full rationale (same
   // pinned scroll-to-scrub pattern, same latent risk of the pin's end
@@ -83,8 +86,8 @@ export default function FeaturedMenu() {
   return (
     <section ref={sectionRef} className="h-scroll" id="menu-scroll">
       <div className="h-intro">
-        <p className="eyebrow-static">برگزیده‌های دفتر</p>
-        <h2>محبوب‌ترین‌ها</h2>
+        <p className="eyebrow-static">{t('popular.eyebrow')}</p>
+        <h2>{t('popular.title')}</h2>
       </div>
       <div
         ref={viewportRef}
@@ -92,36 +95,44 @@ export default function FeaturedMenu() {
         dir="ltr"
       >
         <div ref={trackRef} className="h-track">
-          {items.map((item, i) => (
-            <button
-              type="button"
-              className="h-card"
-              key={item.id}
-              dir="rtl"
-              onClick={() => setSelectedItem(item)}
-            >
-              <Image
-                src={item.image}
-                alt={item.labelFa}
-                fill
-                sizes="(min-width: 1280px) 300px, 26vw"
-                style={{ objectFit: 'cover' }}
-                priority={i < 3}
-              />
-              <div className="h-scrim" />
-              <span className="h-cat">{CATEGORY_META.find((c) => c.slug === item.category)?.name}</span>
-              <span className="h-price">{formatToman(item.price)}</span>
-              <span className="h-label">{item.labelFa}</span>
-            </button>
-          ))}
+          {items.map((item, i) => {
+            const label = isFa ? item.labelFa : item.labelEn;
+            return (
+              <button
+                type="button"
+                className="h-card"
+                key={item.id}
+                dir={isFa ? 'rtl' : 'ltr'}
+                onClick={() => setSelectedItem(item)}
+              >
+                <Image
+                  src={item.image}
+                  alt={label}
+                  fill
+                  sizes="(min-width: 1280px) 300px, 26vw"
+                  style={{ objectFit: 'cover' }}
+                  priority={i < 3}
+                />
+                <div className="h-scrim" />
+                <span className="h-cat">
+                  {(() => {
+                    const cat = CATEGORY_META.find((c) => c.slug === item.category);
+                    return cat ? (isFa ? cat.name : cat.nameEn) : undefined;
+                  })()}
+                </span>
+                <span className="h-price">{formatToman(item.price, locale)}</span>
+                <span className="h-label">{label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
       <div className="h-cta-wrap">
-        <Link href="/menu" className="h-cta focus-ring">
-          مشاهده‌ی کل منو ←
+        <Link href={`/${locale}/menu`} className="h-cta focus-ring">
+          {t('popular.view_all')} {isFa ? '←' : '→'}
         </Link>
       </div>
-      <MenuItemModal item={selectedItem} onClose={() => setSelectedItem(null)} />
+      <MenuItemModal item={selectedItem} onClose={() => setSelectedItem(null)} locale={locale} dict={dict} />
     </section>
   );
 }

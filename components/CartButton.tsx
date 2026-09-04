@@ -4,12 +4,15 @@ import { useEffect, useRef, useState } from 'react';
 import { useCart } from './CartContext';
 import { CartIcon } from './icons';
 import { MENU_ITEMS, formatToman } from '@/lib/menu-data';
+import { translate, type Locale, type Messages } from '@/lib/i18n';
 
-export default function CartButton() {
+export default function CartButton({ locale, dict }: { locale: Locale; dict: Messages }) {
   const [open, setOpen] = useState(false);
   const toggleRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const { cart, itemCount, total, setQuantity, removeItem } = useCart();
+  const t = (key: string) => translate(dict, key);
+  const isFa = locale === 'fa';
 
   // Same open/close pattern as the mobile nav panel in Header.tsx (Escape +
   // click-outside), kept local here rather than shared since the two
@@ -45,7 +48,7 @@ export default function CartButton() {
         className="cart-button focus-ring"
         aria-expanded={open}
         aria-controls="cart-panel"
-        aria-label={`سبد خرید${itemCount > 0 ? ` (${itemCount} کالا)` : ''}`}
+        aria-label={itemCount > 0 ? t('cart.aria_label_with_count').replace('{count}', String(itemCount)) : t('cart.aria_label')}
         onClick={() => setOpen((v) => !v)}
       >
         <CartIcon className="cart-button-icon" />
@@ -57,9 +60,9 @@ export default function CartButton() {
       </button>
 
       {open && (
-        <div id="cart-panel" ref={panelRef} className="cart-panel" dir="rtl">
+        <div id="cart-panel" ref={panelRef} className="cart-panel" dir={isFa ? 'rtl' : 'ltr'}>
           {cart.length === 0 ? (
-            <p className="cart-panel-empty">سبد خرید شما خالیست</p>
+            <p className="cart-panel-empty">{t('cart.empty')}</p>
           ) : (
             <>
               <ul className="cart-panel-list">
@@ -71,19 +74,20 @@ export default function CartButton() {
                   // to avoid a slug/id mismatch.
                   const item = MENU_ITEMS.find((m) => m.id === line.id);
                   if (!item) return null;
+                  const label = isFa ? item.labelFa : item.labelEn;
                   return (
                     <li key={line.id} className="cart-panel-line">
                       <div className="cart-panel-line-info">
-                        <span className="cart-panel-line-name">{item.labelFa}</span>
-                        <span className="cart-panel-line-price">{formatToman(item.price)}</span>
+                        <span className="cart-panel-line-name">{label}</span>
+                        <span className="cart-panel-line-price">{formatToman(item.price, locale)}</span>
                       </div>
                       <div className="cart-panel-line-actions">
-                        <div className="item-modal-qty item-modal-qty--compact" role="group" aria-label="تعداد">
+                        <div className="item-modal-qty item-modal-qty--compact" role="group" aria-label={t('cart.quantity')}>
                           <button
                             type="button"
                             className="item-modal-qty-btn focus-ring"
                             onClick={() => setQuantity(line.id, line.quantity - 1)}
-                            aria-label="کم کردن تعداد"
+                            aria-label={t('cart.decrease_qty')}
                           >
                             −
                           </button>
@@ -92,7 +96,7 @@ export default function CartButton() {
                             type="button"
                             className="item-modal-qty-btn focus-ring"
                             onClick={() => setQuantity(line.id, line.quantity + 1)}
-                            aria-label="زیاد کردن تعداد"
+                            aria-label={t('cart.increase_qty')}
                           >
                             +
                           </button>
@@ -101,9 +105,9 @@ export default function CartButton() {
                           type="button"
                           className="cart-panel-remove focus-ring"
                           onClick={() => removeItem(line.id)}
-                          aria-label={`حذف ${item.labelFa} از سبد`}
+                          aria-label={t('cart.remove_item').replace('{name}', label)}
                         >
-                          حذف
+                          {t('cart.remove')}
                         </button>
                       </div>
                     </li>
@@ -111,8 +115,8 @@ export default function CartButton() {
                 })}
               </ul>
               <div className="cart-panel-total">
-                <span>جمع کل</span>
-                <span>{formatToman(total)}</span>
+                <span>{t('cart.total')}</span>
+                <span>{formatToman(total, locale)}</span>
               </div>
             </>
           )}

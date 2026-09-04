@@ -4,7 +4,8 @@ import { useRef } from 'react';
 import Image from 'next/image';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { GALLERY_PHOTOS, GALLERY_BENTO_SPANS, GALLERY_HEADER, type GalleryBentoSpan } from '@/lib/gallery-data';
+import { GALLERY_PHOTOS, GALLERY_BENTO_SPANS, type GalleryBentoSpan } from '@/lib/gallery-data';
+import { translate, type Locale, type Messages } from '@/lib/i18n';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useIsomorphicLayoutEffect } from '@/hooks/useIsomorphicLayoutEffect';
 
@@ -36,9 +37,11 @@ const SIZES_BY_SPAN: Record<GalleryBentoSpan, string> = {
  * transition than as a GSAP tween, and doesn't need scroll-position
  * awareness the way the cover reveal does.
  */
-export default function Gallery() {
+export default function Gallery({ locale, dict }: { locale: Locale; dict: Messages }) {
   const sectionRef = useRef<HTMLElement>(null);
   const reducedMotion = useReducedMotion();
+  const t = (key: string) => translate(dict, key);
+  const isFa = locale === 'fa';
 
   useIsomorphicLayoutEffect(() => {
     if (!sectionRef.current || reducedMotion) return;
@@ -85,33 +88,36 @@ export default function Gallery() {
 
   return (
     <section className="gallery" ref={sectionRef}>
-      <div className="gallery-inner" dir="rtl">
-        <p className="gallery-eyebrow">{GALLERY_HEADER.eyebrow}</p>
-        <h2 className="gallery-title">{GALLERY_HEADER.title}</h2>
-        <p className="gallery-description">{GALLERY_HEADER.description}</p>
+      <div className="gallery-inner" dir={isFa ? 'rtl' : 'ltr'}>
+        <p className="gallery-eyebrow">{t('gallery.eyebrow')}</p>
+        <h2 className="gallery-title">{t('gallery.title')}</h2>
+        <p className="gallery-description">{t('gallery.description')}</p>
 
         <div className="gallery-grid">
-          {GALLERY_PHOTOS.map((photo, i) => (
-            <figure
-              className={`gallery-cell gallery-cell--${GALLERY_BENTO_SPANS[i]}`}
-              key={photo.id}
-            >
-              <Image
-                src={photo.image}
-                alt={photo.caption}
-                fill
-                sizes={SIZES_BY_SPAN[GALLERY_BENTO_SPANS[i]]}
-                className="gallery-cell-img"
-              />
-              <div className="gallery-cell-scrim" aria-hidden="true" />
-              {/* Reduced motion: cover renders but never animates (no
-                  ScrollTrigger registered above), so it would permanently
-                  hide the photo -- skip rendering it entirely in that case
-                  instead of trying to animate under prefers-reduced-motion. */}
-              {!reducedMotion && <div className="gallery-cell-cover" aria-hidden="true" />}
-              <figcaption className="gallery-cell-caption">{photo.caption}</figcaption>
-            </figure>
-          ))}
+          {GALLERY_PHOTOS.map((photo, i) => {
+            const caption = isFa ? photo.caption : photo.captionEn;
+            return (
+              <figure
+                className={`gallery-cell gallery-cell--${GALLERY_BENTO_SPANS[i]}`}
+                key={photo.id}
+              >
+                <Image
+                  src={photo.image}
+                  alt={caption}
+                  fill
+                  sizes={SIZES_BY_SPAN[GALLERY_BENTO_SPANS[i]]}
+                  className="gallery-cell-img"
+                />
+                <div className="gallery-cell-scrim" aria-hidden="true" />
+                {/* Reduced motion: cover renders but never animates (no
+                    ScrollTrigger registered above), so it would permanently
+                    hide the photo -- skip rendering it entirely in that case
+                    instead of trying to animate under prefers-reduced-motion. */}
+                {!reducedMotion && <div className="gallery-cell-cover" aria-hidden="true" />}
+                <figcaption className="gallery-cell-caption">{caption}</figcaption>
+              </figure>
+            );
+          })}
         </div>
       </div>
     </section>

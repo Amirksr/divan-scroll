@@ -1,16 +1,18 @@
 interface LogoProps {
   wordmark: string;
+  isFa?: boolean;
   className?: string;
 }
 
 /**
  * Logo mark: a coffee cup inside a seal/stamp ring, echoing DivanCafe's
  * signature coffee-ring motif. Ported directly from DivanCafe's
- * src/components/Logo.tsx (the `isFa`-driven font swap and `cn()` helper
- * were dropped here since divan-scroll doesn't have i18n routing yet —
- * everything renders in Farsi for now).
+ * src/components/Logo.tsx. `isFa` (default true, matching this project's
+ * original Farsi-only assumption) picks the wordmark's font family --
+ * Vazirmatn for Farsi, Newsreader for the English wordmark -- now that
+ * i18n routing exists to actually pass a non-Farsi wordmark through.
  */
-export default function Logo({ wordmark, className }: LogoProps) {
+export default function Logo({ wordmark, isFa = true, className }: LogoProps) {
   return (
     <span className={`logo ${className ?? ''}`}>
       <svg viewBox="0 0 40 40" aria-hidden="true" className="logo-mark">
@@ -41,7 +43,7 @@ export default function Logo({ wordmark, className }: LogoProps) {
           opacity="0.8"
         />
       </svg>
-      <span className="logo-wordmark">{wordmark}</span>
+      <span className={isFa ? 'logo-wordmark' : 'logo-wordmark logo-wordmark--en'}>{wordmark}</span>
     </span>
   );
 }

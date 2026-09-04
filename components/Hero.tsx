@@ -8,12 +8,14 @@ import SmokeCanvas from './SmokeCanvas';
 import { getParagraphOpacity } from '@/lib/story-utils';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useIsomorphicLayoutEffect } from '@/hooks/useIsomorphicLayoutEffect';
+import { translate, type Messages } from '@/lib/i18n';
 
 gsap.registerPlugin(ScrollTrigger);
 
-export default function Hero() {
+export default function Hero({ dict }: { dict: Messages }) {
   const rootRef = useRef<HTMLElement>(null);
   const reducedMotion = useReducedMotion();
+  const t = (key: string) => translate(dict, key);
 
   useIsomorphicLayoutEffect(() => {
     if (!rootRef.current) return;
@@ -92,21 +94,18 @@ export default function Hero() {
       <div className="hero-bg-scrim" aria-hidden="true" />
       <SmokeCanvas active={!reducedMotion} className="smoke-canvas" />
       <div className="hero-inner">
-        <div className="eyebrow">کافه و آشپزخانه — تأسیس ۱۴۰۱</div>
+        <div className="eyebrow">{t('hero.eyebrow')}</div>
         <div className="title-stack">
           <div className="title-fa">دیوان</div>
           <div className="title-en">DIVAN</div>
         </div>
         <div className="hero-line" />
         <div className="hero-crossfade">
-          <div className="subline">هر فنجان، یک بیت از دفتر روزانه‌ی ماست</div>
-          <p className="hero-description">
-            در دیوان، دم‌کردن قهوه را مثل خواندن یک غزل می‌بینیم؛ آهسته، دقیق و با معنا. دانه‌های
-            تازه‌برشته، نان‌های خانگی و فضایی برای نشستن و ماندن.
-          </p>
+          <div className="subline">{t('hero.subtitle')}</div>
+          <p className="hero-description">{t('hero.description')}</p>
         </div>
       </div>
-      <div className="scroll-cue">اسکرول کنید</div>
+      <div className="scroll-cue">{t('hero.scroll_cue')}</div>
     </section>
   );
 }

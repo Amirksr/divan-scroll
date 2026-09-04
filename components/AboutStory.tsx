@@ -7,17 +7,22 @@ import { STORY } from '@/lib/story-data';
 import { getParagraphOpacity } from '@/lib/story-utils';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useIsomorphicLayoutEffect } from '@/hooks/useIsomorphicLayoutEffect';
+import type { Locale } from '@/lib/i18n';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const PARAGRAPH_COUNT = STORY.paragraphsFa.length;
 
-export default function AboutStory() {
+export default function AboutStory({ locale }: { locale: Locale }) {
   const sectionRef = useRef<HTMLElement>(null);
   const paragraphRefs = useRef<Array<HTMLParagraphElement | null>>([]);
   const valueRefs = useRef<Array<HTMLDivElement | null>>([]);
   const teamRefs = useRef<Array<HTMLDivElement | null>>([]);
   const reducedMotion = useReducedMotion();
+  const isFa = locale === 'fa';
+  const paragraphs = isFa ? STORY.paragraphsFa : STORY.paragraphsEn;
+  const values = isFa ? STORY.values : STORY.valuesEn;
+  const team = isFa ? STORY.team : STORY.teamEn;
 
   useIsomorphicLayoutEffect(() => {
     if (!sectionRef.current) return;
@@ -102,10 +107,10 @@ export default function AboutStory() {
   return (
     <section ref={sectionRef} className="about-story" id="about">
       <div className="about-pin">
-        <p className="eyebrow-static">{STORY.eyebrowFa}</p>
-        <h2 className="about-title">{STORY.titleFa}</h2>
+        <p className="eyebrow-static">{isFa ? STORY.eyebrowFa : STORY.eyebrowEn}</p>
+        <h2 className="about-title">{isFa ? STORY.titleFa : STORY.titleEn}</h2>
         <div className={reducedMotion ? 'about-paragraphs about-paragraphs--static' : 'about-paragraphs'}>
-          {STORY.paragraphsFa.map((text, i) => (
+          {paragraphs.map((text, i) => (
             <p
               key={i}
               ref={(el) => {
@@ -121,9 +126,9 @@ export default function AboutStory() {
       </div>
 
       <div className="about-values">
-        <p className="about-values-title">{STORY.valuesTitleFa}</p>
+        <p className="about-values-title">{isFa ? STORY.valuesTitleFa : STORY.valuesTitleEn}</p>
         <div className="about-values-grid">
-          {STORY.values.map((value, i) => (
+          {values.map((value, i) => (
             <div
               key={value.title}
               ref={(el) => {
@@ -140,9 +145,9 @@ export default function AboutStory() {
       </div>
 
       <div className="about-team">
-        <p className="about-team-title">{STORY.teamTitleFa}</p>
+        <p className="about-team-title">{isFa ? STORY.teamTitleFa : STORY.teamTitleEn}</p>
         <div className="about-team-grid">
-          {STORY.team.map((member, i) => (
+          {team.map((member, i) => (
             <div
               key={member.name}
               ref={(el) => {

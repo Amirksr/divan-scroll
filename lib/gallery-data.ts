@@ -13,20 +13,27 @@
 export interface GalleryPhoto {
   id: string;
   caption: string;
+  captionEn: string;
   image: string;
 }
 
 export const GALLERY_PHOTOS: GalleryPhoto[] = [
-  { id: 'interior', caption: 'فضای داخلی', image: '/images/gallery/interior.webp' },
-  { id: 'courtyard', caption: 'حیاط مرکزی', image: '/images/gallery/courtyard.webp' },
-  { id: 'roastery', caption: 'رست‌خانه‌ی شیشه‌ای', image: '/images/gallery/roastery.webp' },
-  { id: 'library', caption: 'گوشه‌ی کتاب', image: '/images/gallery/library.webp' },
+  { id: 'interior', caption: 'فضای داخلی', captionEn: 'Interior', image: '/images/gallery/interior.webp' },
+  { id: 'courtyard', caption: 'حیاط مرکزی', captionEn: 'Courtyard', image: '/images/gallery/courtyard.webp' },
+  {
+    id: 'roastery',
+    caption: 'رست‌خانه‌ی شیشه‌ای',
+    captionEn: 'Glass roastery',
+    image: '/images/gallery/roastery.webp',
+  },
+  { id: 'library', caption: 'گوشه‌ی کتاب', captionEn: 'Reading corner', image: '/images/gallery/library.webp' },
   {
     id: 'coffee',
     caption: 'قهوه و اسپرسو',
+    captionEn: 'Coffee & Espresso',
     image: 'https://images.unsplash.com/photo-1426174840074-541ae41efdb9?w=800&q=80&auto=format&fit=crop',
   },
-  { id: 'pastry', caption: 'شیرینی و دسر', image: '/images/gallery/pastry.webp' },
+  { id: 'pastry', caption: 'شیرینی و دسر', captionEn: 'Pastry & Dessert', image: '/images/gallery/pastry.webp' },
 ];
 
 /**

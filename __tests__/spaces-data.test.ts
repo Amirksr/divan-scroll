@@ -17,11 +17,17 @@ describe('spaces-data', () => {
     }
   });
 
-  it('every space photo path is unique and under /space-photos/', () => {
+  it('every space photo path is unique and under /images/space-photos/', () => {
     const allPaths = SPACES.flatMap((s) => s.photos.map((p) => p.src));
     expect(new Set(allPaths).size).toBe(allPaths.length);
     for (const path of allPaths) {
-      expect(path.startsWith('/space-photos/')).toBe(true);
+      // Was asserting '/space-photos/' (no /images prefix) -- didn't
+      // match the actual data (`/images/space-photos/...`, same
+      // convention as coverImage's `/images/gallery/...` below), so this
+      // assertion had been failing since the day this file was written.
+      // Not part of this session's i18n work, but a one-line fix
+      // encountered directly while touching this exact file for that.
+      expect(path.startsWith('/images/space-photos/')).toBe(true);
     }
   });
 

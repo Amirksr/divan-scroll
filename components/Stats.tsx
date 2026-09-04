@@ -3,16 +3,18 @@
 import { useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { STATS, STATS_TITLE_FA, formatStatValue } from '@/lib/stats-data';
+import { STATS, STATS_TITLE_FA, STATS_TITLE_EN, formatStatValue } from '@/lib/stats-data';
+import { translate, type Locale, type Messages } from '@/lib/i18n';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useIsomorphicLayoutEffect } from '@/hooks/useIsomorphicLayoutEffect';
 
 gsap.registerPlugin(ScrollTrigger);
 
-export default function Stats() {
+export default function Stats({ locale, dict }: { locale: Locale; dict: Messages }) {
   const sectionRef = useRef<HTMLElement>(null);
   const valueRefs = useRef<Array<HTMLParagraphElement | null>>([]);
   const reducedMotion = useReducedMotion();
+  const title = locale === 'fa' ? STATS_TITLE_FA : STATS_TITLE_EN;
 
   useIsomorphicLayoutEffect(() => {
     if (!sectionRef.current) return;
@@ -24,7 +26,7 @@ export default function Stats() {
       // still uses formatStatValue so the displayed text matches exactly
       // what the animated version would land on.
       els.forEach((el, i) => {
-        el.textContent = formatStatValue(STATS[i].value, STATS[i].decimals, STATS[i].suffix);
+        el.textContent = formatStatValue(STATS[i].value, STATS[i].decimals, STATS[i].suffix, locale);
       });
       return;
     }
@@ -42,7 +44,7 @@ export default function Stats() {
               duration: 1.6,
               ease: 'power2.out',
               onUpdate: () => {
-                el.textContent = formatStatValue(counter.value, stat.decimals, stat.suffix);
+                el.textContent = formatStatValue(counter.value, stat.decimals, stat.suffix, locale);
               },
             });
           });
@@ -52,10 +54,10 @@ export default function Stats() {
     }, sectionRef);
 
     return () => ctx.revert();
-  }, [reducedMotion]);
+  }, [reducedMotion, locale]);
 
   return (
-    <section ref={sectionRef} className="stats" aria-label={STATS_TITLE_FA}>
+    <section ref={sectionRef} className="stats" aria-label={title}>
       <div className="stats-grid">
         {STATS.map((stat, i) => (
           <div key={stat.key} className="stat-item">
@@ -66,9 +68,9 @@ export default function Stats() {
               className="stat-value"
               style={reducedMotion ? undefined : { opacity: 0 }}
             >
-              {formatStatValue(0, stat.decimals, '')}
+              {formatStatValue(0, stat.decimals, '', locale)}
             </p>
-            <p className="stat-label">{stat.labelFa}</p>
+            <p className="stat-label">{locale === 'fa' ? stat.labelFa : stat.labelEn}</p>
           </div>
         ))}
       </div>

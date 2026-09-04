@@ -5,22 +5,28 @@ export type CategorySlug = 'coffee' | 'tea' | 'breakfast' | 'pastry' | 'cold' | 
 export interface CategoryMeta {
   slug: CategorySlug;
   name: string;
+  nameEn: string;
   unit: string;
+  unitEn: string;
 }
 
-/** Sourced from DivanCafe's messages/fa.json -> categories. */
+/** Sourced from DivanCafe's messages/{fa,en}.json -> categories. */
 export const CATEGORIES_EYEBROW = 'دفتر دیوان';
+export const CATEGORIES_EYEBROW_EN = 'The Ledger';
 export const CATEGORIES_TITLE = 'دسته‌بندی منو';
+export const CATEGORIES_TITLE_EN = 'Browse the menu';
 export const CATEGORIES_DESC =
   'از اسپرسوهای تک‌خاستگاه تا صبحانه‌ی کامل ایرانی؛ هرچه می‌خواهید، جایی در این دفتر دارد.';
+export const CATEGORIES_DESC_EN =
+  'From single-origin espresso to a full Persian breakfast — everything has its page in this ledger.';
 
 export const CATEGORY_META: CategoryMeta[] = [
-  { slug: 'coffee', name: 'قهوه و اسپرسو', unit: 'نوشیدنی' },
-  { slug: 'tea', name: 'دمنوش و چای', unit: 'نوشیدنی' },
-  { slug: 'breakfast', name: 'صبحانه', unit: 'مورد' },
-  { slug: 'pastry', name: 'شیرینی و دسر', unit: 'مورد' },
-  { slug: 'cold', name: 'نوشیدنی سرد', unit: 'نوشیدنی' },
-  { slug: 'brunch', name: 'غذای اصلی', unit: 'مورد' },
+  { slug: 'coffee', name: 'قهوه و اسپرسو', nameEn: 'Coffee & Espresso', unit: 'نوشیدنی', unitEn: 'drinks' },
+  { slug: 'tea', name: 'دمنوش و چای', nameEn: 'Tea & Infusions', unit: 'نوشیدنی', unitEn: 'drinks' },
+  { slug: 'breakfast', name: 'صبحانه', nameEn: 'Breakfast', unit: 'مورد', unitEn: 'dishes' },
+  { slug: 'pastry', name: 'شیرینی و دسر', nameEn: 'Pastry & Dessert', unit: 'مورد', unitEn: 'items' },
+  { slug: 'cold', name: 'نوشیدنی سرد', nameEn: 'Cold Drinks', unit: 'نوشیدنی', unitEn: 'drinks' },
+  { slug: 'brunch', name: 'غذای اصلی', nameEn: 'Mains', unit: 'مورد', unitEn: 'dishes' },
 ];
 
 /**

@@ -3,42 +3,41 @@ import Logo from './Logo';
 import CartButton from './CartButton';
 import ThemeToggle from './ThemeToggle';
 import MobileNav from './MobileNav';
+import { translate, type Locale, type Messages } from '@/lib/i18n';
 
 /**
- * Scoped port of DivanCafe's src/components/Header.tsx. Still dropped:
- * LanguageSwitcher and route-based active-link detection (usePathname) --
- * those return once i18n routing lands.
+ * Scoped port of DivanCafe's src/components/Header.tsx, now locale-aware
+ * (locale/dict passed down from app/[locale]/layout.tsx, same as
+ * DivanCafe's own Header).
  *
  * The reserve CTA and the old plain mobile-dropdown were replaced with a
  * single off-canvas MobileNav (components/MobileNav.tsx), a faithful port
  * of DivanCafe's actual off-canvas panel: it now carries the nav links,
- * ThemeToggle, and the reserve button, so this persistent bar only holds
- * the logo, the desktop nav row (which nav links still also live in, for
- * >=1024px users), the cart, and the menu toggle -- no separate reserve
- * pill competing for space here anymore.
- *
- * Links use `/#section` (absolute path + hash) rather than bare `#section`
- * because Header is global (rendered on every route via layout.tsx) -- a
- * bare `#hero` href would silently do nothing on /menu, which has no
- * element with that id.
+ * ThemeToggle, LanguageSwitcher, and the reserve button, so this
+ * persistent bar only holds the logo, the desktop nav row (which nav
+ * links still also live in, for >=1024px users), the cart, and the menu
+ * toggle -- no separate reserve pill competing for space here anymore.
  */
-const NAV_LINKS = [
-  { href: '/#hero', label: 'خانه' },
-  { href: '/menu', label: 'منوی کامل' },
-  { href: '/about', label: 'درباره دیوان' },
-  { href: '/contact', label: 'ارتباط با دیوان' },
-];
+export default function Header({ locale, dict }: { locale: Locale; dict: Messages }) {
+  const t = (key: string) => translate(dict, key);
+  const prefix = `/${locale}`;
 
-export default function Header() {
+  const navLinks = [
+    { href: `${prefix}#hero`, label: t('nav.home') },
+    { href: `${prefix}/menu`, label: t('nav.menu') },
+    { href: `${prefix}/about`, label: t('nav.about') },
+    { href: `${prefix}/contact`, label: t('nav.contact') },
+  ];
+
   return (
     <header className="site-header">
       <div className="site-header-inner">
-        <Link href="/" className="focus-ring">
-          <Logo wordmark="دیوان" />
+        <Link href={prefix} className="focus-ring">
+          <Logo wordmark={dict.hero.title} isFa={locale === 'fa'} />
         </Link>
 
-        <nav className="site-nav" aria-label="ناوبری اصلی">
-          {NAV_LINKS.map((link) => (
+        <nav className="site-nav" aria-label={t('mobile_nav.aria_label')}>
+          {navLinks.map((link) => (
             <Link key={link.href} href={link.href} className="site-nav-link focus-ring">
               {link.label}
             </Link>
@@ -46,9 +45,9 @@ export default function Header() {
         </nav>
 
         <div className="site-header-actions">
-          <ThemeToggle />
-          <CartButton />
-          <MobileNav />
+          <ThemeToggle dict={dict} />
+          <CartButton locale={locale} dict={dict} />
+          <MobileNav locale={locale} dict={dict} />
         </div>
       </div>
     </header>

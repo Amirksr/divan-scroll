@@ -7,10 +7,13 @@ import { formatToman } from '@/lib/menu-data';
 import { parseIngredients } from '@/lib/ingredients-utils';
 import { CATEGORY_META } from '@/lib/categories-data';
 import { useCart } from './CartContext';
+import { translate, type Locale, type Messages } from '@/lib/i18n';
 
 interface MenuItemModalProps {
   item: MenuItem | null;
   onClose: () => void;
+  locale: Locale;
+  dict: Messages;
 }
 
 /**
@@ -20,7 +23,9 @@ interface MenuItemModalProps {
  * accessible than reimplementing that logic (see accessibility skill:
  * "prefer native semantic elements over ARIA replacements").
  */
-export default function MenuItemModal({ item, onClose }: MenuItemModalProps) {
+export default function MenuItemModal({ item, onClose, locale, dict }: MenuItemModalProps) {
+  const t = (key: string) => translate(dict, key);
+  const isFa = locale === 'fa';
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [quantity, setQuantity] = useState(1);
   const [justAdded, setJustAdded] = useState(false);
@@ -70,7 +75,9 @@ export default function MenuItemModal({ item, onClose }: MenuItemModalProps) {
   }
 
   const ingredients = parseIngredients(item.descFa);
-  const categoryName = CATEGORY_META.find((c) => c.slug === item.category)?.name;
+  const category = CATEGORY_META.find((c) => c.slug === item.category);
+  const categoryName = category ? (isFa ? category.name : category.nameEn) : undefined;
+  const label = isFa ? item.labelFa : item.labelEn;
   const inCartQuantity = getQuantity(item.id);
 
   const handleAddToCart = () => {
@@ -92,14 +99,14 @@ export default function MenuItemModal({ item, onClose }: MenuItemModalProps) {
         if (e.target === dialogRef.current) handleDismiss();
       }}
     >
-      <div className="item-modal-content" dir="rtl">
+      <div className="item-modal-content" dir={isFa ? 'rtl' : 'ltr'}>
         <div className="item-modal-media">
-          <button type="button" className="item-modal-close focus-ring" onClick={handleDismiss} aria-label="بستن">
+          <button type="button" className="item-modal-close focus-ring" onClick={handleDismiss} aria-label={t('quick_view.close')}>
             ✕
           </button>
           <Image
             src={item.image}
-            alt={item.labelFa}
+            alt={label}
             fill
             sizes="(min-width: 768px) 480px, 100vw"
             style={{ objectFit: 'cover' }}
@@ -107,16 +114,16 @@ export default function MenuItemModal({ item, onClose }: MenuItemModalProps) {
           />
           <div className="item-modal-badges">
             {categoryName && <span className="item-modal-badge">{categoryName}</span>}
-            {item.popular && <span className="item-modal-badge item-modal-badge--popular">محبوب</span>}
-            {item.vegetarian && <span className="item-modal-badge item-modal-badge--veg">گیاهی</span>}
+            {item.popular && <span className="item-modal-badge item-modal-badge--popular">{t('common.popular')}</span>}
+            {item.vegetarian && <span className="item-modal-badge item-modal-badge--veg">{t('common.vegetarian')}</span>}
           </div>
         </div>
 
         <div className="item-modal-body">
           <h2 id="item-modal-title" className="item-modal-title">
-            {item.labelFa}
+            {label}
           </h2>
-          <p className="item-modal-title-en">{item.labelEn}</p>
+          {isFa && <p className="item-modal-title-en">{item.labelEn}</p>}
 
           {ingredients.length > 0 && (
             <ul className="item-modal-ingredients">
@@ -127,14 +134,14 @@ export default function MenuItemModal({ item, onClose }: MenuItemModalProps) {
           )}
 
           <div className="item-modal-footer">
-            <span className="item-modal-price">{formatToman(item.price)}</span>
+            <span className="item-modal-price">{formatToman(item.price, locale)}</span>
 
-            <div className="item-modal-qty" role="group" aria-label="تعداد">
+            <div className="item-modal-qty" role="group" aria-label={t('quick_view.quantity')}>
               <button
                 type="button"
                 className="item-modal-qty-btn focus-ring"
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                aria-label="کم کردن تعداد"
+                aria-label={t('quick_view.decrease_qty')}
                 disabled={quantity <= 1}
               >
                 −
@@ -146,7 +153,7 @@ export default function MenuItemModal({ item, onClose }: MenuItemModalProps) {
                 type="button"
                 className="item-modal-qty-btn focus-ring"
                 onClick={() => setQuantity((q) => q + 1)}
-                aria-label="زیاد کردن تعداد"
+                aria-label={t('quick_view.increase_qty')}
               >
                 +
               </button>
@@ -154,12 +161,12 @@ export default function MenuItemModal({ item, onClose }: MenuItemModalProps) {
           </div>
 
           <button type="button" className="item-modal-add focus-ring" onClick={handleAddToCart}>
-            {justAdded ? 'به سبد اضافه شد ✓' : 'افزودن به سبد خرید'}
+            {justAdded ? t('quick_view.added') : t('quick_view.add_to_cart')}
           </button>
 
           {inCartQuantity > 0 && (
             <p className="item-modal-in-cart" aria-live="polite">
-              {inCartQuantity} عدد از این مورد در سبد شماست
+              {t('quick_view.in_cart').replace('{count}', String(inCartQuantity))}
             </p>
           )}
         </div>

@@ -1,9 +1,10 @@
 import { render, screen, fireEvent } from '@testing-library/react';
+import { getMessages } from '../lib/i18n';
 import ContactForm from '../components/ContactForm';
 
 describe('<ContactForm />', () => {
   it('renders the reservation form with all fields', () => {
-    render(<ContactForm />);
+    render(<ContactForm dict={getMessages('fa')} />);
     expect(screen.getByRole('heading', { name: 'رزرو میز' })).toBeInTheDocument();
     expect(screen.getByLabelText('نام شما')).toBeInTheDocument();
     expect(screen.getByLabelText('ایمیل')).toBeInTheDocument();
@@ -15,7 +16,7 @@ describe('<ContactForm />', () => {
   });
 
   it('shows validation errors and does not submit when required fields are empty', () => {
-    render(<ContactForm />);
+    render(<ContactForm dict={getMessages('fa')} />);
     fireEvent.click(screen.getByRole('button', { name: 'ارسال پیام' }));
 
     // Once an error <span> renders inside the <label>, its text becomes
@@ -30,7 +31,7 @@ describe('<ContactForm />', () => {
   });
 
   it('submits successfully and shows a confirmation once required fields are valid', () => {
-    render(<ContactForm />);
+    render(<ContactForm dict={getMessages('fa')} />);
 
     fireEvent.change(screen.getByLabelText('نام شما'), { target: { value: 'امیر' } });
     fireEvent.change(screen.getByLabelText('ایمیل'), { target: { value: 'amir@example.com' } });
@@ -42,7 +43,7 @@ describe('<ContactForm />', () => {
   });
 
   it('leaves phone, party size, and date optional', () => {
-    render(<ContactForm />);
+    render(<ContactForm dict={getMessages('fa')} />);
 
     fireEvent.change(screen.getByLabelText('نام شما'), { target: { value: 'امیر' } });
     fireEvent.change(screen.getByLabelText('ایمیل'), { target: { value: 'amir@example.com' } });
