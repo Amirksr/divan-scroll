@@ -1202,6 +1202,20 @@ body {
   pointer-events: auto;
 }
 
+html {
+  /* Off-screen direction for the off-canvas drawer's closed state -- see
+     the comment on .mobile-nav-drawer below. Set on <html> (inherited)
+     rather than baked into a higher-specificity `.mobile-nav-drawer`
+     selector, so it can never out-rank `.mobile-nav-drawer--open` in the
+     cascade: both rules stay at equal (0,1,0) specificity and source
+     order (the --open rule is declared later) decides, exactly as
+     before this variable existed. */
+  --mobile-nav-closed-x: 100%;
+}
+html[dir='ltr'] {
+  --mobile-nav-closed-x: -100%;
+}
+
 .mobile-nav-drawer {
   position: fixed;
   inset-block: 0;
@@ -1213,11 +1227,17 @@ body {
   background: var(--ink);
   border-inline-end: 1px solid var(--line);
   box-shadow: 0 0 40px rgb(28 22 19 / 0.4);
-  /* Slides in from the end (right, since the whole site is RTL for now).
-     Once i18n adds LTR English pages, this needs a `[dir='ltr']` variant
-     that translates from -100% instead -- same as DivanCafe's `isFa ?
-     translate-x-full : -translate-x-full`. */
-  transform: translateX(100%);
+  /* Slides in from the end. `inset-inline-start` anchors the panel to the
+     right in RTL (fa) and the left in LTR (en), but `transform` is always
+     a physical (not logical) offset, so the closed-state direction has to
+     be flipped per `dir` via --mobile-nav-closed-x above -- same as
+     DivanCafe's `isFa ? translate-x-full : -translate-x-full`. Without
+     that flip, the fa-only default (translateX(100%)) pushes an
+     LTR-anchored (left: 0) panel *into* the viewport instead of off of
+     it on any screen wider than ~2x the panel's width, which is most
+     phones/tablets/desktops -- i.e. the panel appears open, full-height,
+     with no user interaction. */
+  transform: translateX(var(--mobile-nav-closed-x));
   transition: transform 0.3s ease-out;
 }
 .mobile-nav-drawer--open {
