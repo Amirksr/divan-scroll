@@ -16,10 +16,41 @@
   --gold: #d4a24c;
   --sage: #788650;
 
+  /* Fixed (never theme-flipped) text/icon color for the hardcoded-dark
+     photo scrims named in the comment above html.light below: hero,
+     gallery cells, space cards, and the space lightbox's nav/close
+     buttons. Those scrims stay dark in both themes on purpose (a photo
+     needs a dark backdrop for legibility regardless of site theme), so
+     the text/icons sitting on them must stay a fixed light color too --
+     using --parchment/--parchment-rgb there (which DO flip, since they
+     drive the normal page-background text color) put light-theme text
+     on a still-dark backdrop, i.e. dark-on-dark. Value matches what
+     .subline/.scroll-cue already hardcoded for the same reason, now
+     shared instead of re-hardcoded per selector. */
+  --photo-text-rgb: 237 230 214;
+
   --font-display: var(--font-newsreader), 'Newsreader', serif;
   --font-fa: var(--font-vazirmatn), 'Vazirmatn', sans-serif;
   --font-body: var(--font-inter), 'Inter', sans-serif;
   --font-mono: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+
+  /* Body/content font for whichever language the current page is in.
+     Every selector styling dict-/prop-driven text (headings, card
+     copy, nav links, form fields, etc.) should reference this instead
+     of --font-fa directly -- --font-fa is Vazirmatn, which is correct
+     for the fa route (the default below) but was being force-applied
+     to real English dictionary strings on /en pages too, pre-i18n
+     assumption. The couple of spots that render a *literal*, always-fa
+     glyph regardless of route locale (e.g. the hero's "دیوان" in
+     .title-fa, alongside "DIVAN" in .title-en which already keys off
+     --font-display) intentionally keep using --font-fa directly, not
+     this alias -- they aren't translated content, so they have nothing
+     to switch on. */
+  --font-current: var(--font-fa);
+}
+
+html[lang='en'] {
+  --font-current: var(--font-body);
 }
 
 /*
@@ -205,6 +236,11 @@ body {
   align-items: center;
   justify-content: center;
   will-change: transform, opacity, filter;
+  /* Sits on .hero-bg-scrim, which stays dark in both themes -- see
+     --photo-text-rgb above. Without this, these inherited body's
+     theme-flipping `color: var(--parchment)`, so the hero's main
+     brand title went dark-on-dark in light theme. */
+  color: rgb(var(--photo-text-rgb));
 }
 
 .title-fa {
@@ -228,10 +264,10 @@ body {
   margin-top: 1.1rem;
   max-width: 30rem;
   margin-inline: auto;
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-size: 0.92rem;
   line-height: 1.9;
-  color: rgb(var(--parchment-rgb) / 0.6);
+  color: rgb(var(--photo-text-rgb) / 0.6);
   opacity: 0;
 }
 
@@ -283,7 +319,7 @@ body {
 .subline {
   margin-top: 1.8rem;
   font-size: 1rem;
-  color: rgba(237, 230, 214, 0.6);
+  color: rgb(var(--photo-text-rgb) / 0.6);
   opacity: 0;
 }
 
@@ -302,7 +338,7 @@ body {
   font-size: 0.68rem;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: rgba(237, 230, 214, 0.4);
+  color: rgb(var(--photo-text-rgb) / 0.4);
   opacity: 0;
 }
 
@@ -312,7 +348,7 @@ body {
   text-align: center;
 }
 .menu-page-intro h1 {
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-weight: 400;
   font-size: clamp(1.8rem, 1.6rem + 1vw, 2.4rem);
   margin: 0.75rem 0 1rem;
@@ -393,7 +429,7 @@ body {
 }
 
 .full-menu-tab {
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-size: 0.82rem;
   padding: 0.45rem 1rem;
   border-radius: 999px;
@@ -431,7 +467,7 @@ body {
   background: var(--ink);
 }
 .categories-title {
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-weight: 400;
   font-size: clamp(1.6rem, 1.45rem + 0.75vw, 2rem);
   margin: 0.75rem 0 1rem;
@@ -481,7 +517,7 @@ body {
   flex-shrink: 0;
 }
 .category-card h3 {
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-weight: 700;
   font-size: 1.05rem;
   color: var(--parchment);
@@ -490,7 +526,19 @@ body {
 .category-card p {
   margin-top: 0.4rem;
   font-size: 0.8rem;
-  color: var(--gold);
+  /* Was the fixed --gold accent color -- on this project's light-theme
+     background (#faf5ec) that sits at roughly 2.1:1 contrast, well
+     under the ~4.5:1 WCAG AA minimum for body text, effectively
+     unreadable. This card sits on the normal page background (which
+     the light theme already flips), not one of the hardcoded-dark
+     photo scrims, so unlike the hero/gallery/space-card fixes above,
+     the right fix is the theme-aware parchment token, not a fixed
+     color. DivanCafe's real category card uses text-parchment/50 for
+     this same secondary text, but /50 only reaches ~3.36:1 here (still
+     under AA) -- /65 matches this project's own convention for the
+     same "description under a card heading" role elsewhere
+     (.about-value-card p, .space-card-desc) and lands at ~5.37:1. */
+  color: rgb(var(--parchment-rgb) / 0.65);
 }
 .category-card--soon {
   opacity: 0.45;
@@ -644,7 +692,7 @@ body {
 }
 
 .about-title {
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-weight: 400;
   /* Was clamp(1.7rem, 1.5rem + 1vw, 2.4rem) -- much smaller than
      DivanCafe's actual about-page h1 (text-5xl/text-6xl, 48-60px). This
@@ -672,7 +720,7 @@ body {
      stretched to the container's min-height, so a longer paragraph (more
      line-wraps on mobile) doesn't get clipped or overlap the next
      section. */
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-size: clamp(1rem, 0.96rem + 0.21vw, 1.15rem);
   line-height: 2;
   color: rgb(var(--parchment-rgb) / 0.85);
@@ -707,7 +755,7 @@ body {
      centered, but this project's .about-pin content above it already is,
      so centering keeps this section visually aligned with it). */
   text-align: center;
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-weight: 400;
   font-size: clamp(1.9rem, 1.4vw + 1.5rem, 2.75rem);
   color: var(--parchment);
@@ -732,7 +780,7 @@ body {
   text-align: center;
 }
 .about-value-card h3 {
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   /* Was 700 -- DivanCafe's value-card title also has no weight override
      (same reasoning as the site-wide heading-weight note near :root). */
   font-weight: 400;
@@ -756,7 +804,7 @@ body {
 .about-team-title {
   /* Same fix as .about-values-title above -- was a tiny uppercase gold
      label, now a real heading matching the site's section-heading scale. */
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-weight: 400;
   font-size: clamp(1.9rem, 1.4vw + 1.5rem, 2.75rem);
   color: var(--parchment);
@@ -798,7 +846,7 @@ body {
 }
 
 .about-team-name {
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-size: 0.95rem;
   color: var(--parchment);
 }
@@ -902,7 +950,7 @@ body {
   position: absolute;
   left: 1rem;
   bottom: 1rem;
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-weight: 600;
   font-size: clamp(0.82rem, 1.2vw + 0.6rem, 0.95rem);
 }
@@ -911,7 +959,7 @@ body {
   position: absolute;
   left: 1rem;
   bottom: 2.4rem;
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-size: clamp(0.68rem, 0.9vw + 0.5rem, 0.75rem);
   color: var(--gold);
 }
@@ -947,7 +995,7 @@ body {
   border: 1px solid var(--copper);
   color: var(--parchment);
   text-decoration: none;
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-size: 0.9rem;
   border-radius: 999px;
   transition: background 0.2s ease, color 0.2s ease;
@@ -1098,7 +1146,7 @@ body {
   }
 }
 .site-nav-link {
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-size: 0.9rem;
   color: rgb(var(--parchment-rgb) / 0.8);
   text-decoration: none;
@@ -1113,7 +1161,7 @@ body {
    below) to keep this bar uncluttered. Kept here in case a future page
    wants an inline reserve link again. */
 .reserve-pill {
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-size: 0.85rem;
   color: var(--copper-bright);
   border: 1px solid var(--copper);
@@ -1294,7 +1342,7 @@ html[dir='ltr'] {
   gap: 0.75rem;
   border-radius: 10px;
   padding: 0.75rem;
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-size: 1rem;
   color: rgb(var(--parchment-rgb) / 0.85);
   text-decoration: none;
@@ -1343,7 +1391,7 @@ html[dir='ltr'] {
   border-radius: 10px;
   background: var(--copper);
   padding: 0.85rem 1.25rem;
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-size: 0.9rem;
   font-weight: 700;
   color: var(--ink);
@@ -1381,7 +1429,7 @@ html[dir='ltr'] {
   }
 }
 .footer-wordmark {
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-size: 1.5rem;
   color: var(--parchment);
 }
@@ -1449,7 +1497,7 @@ html[dir='ltr'] {
   border-end-end-radius: 10px;
   background: transparent;
   padding: 0.55rem 0.9rem;
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-size: 0.85rem;
   color: var(--copper-bright);
   cursor: pointer;
@@ -1576,7 +1624,7 @@ html[dir='ltr'] {
   gap: 0.4rem;
 }
 .item-modal-badge {
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-size: 0.68rem;
   letter-spacing: 0.06em;
   padding: 0.3rem 0.7rem;
@@ -1604,7 +1652,7 @@ html[dir='ltr'] {
 }
 
 .item-modal-title {
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-weight: 400;
   font-size: clamp(1.2rem, 1.4vw + 0.9rem, 1.5rem);
 }
@@ -1622,7 +1670,7 @@ html[dir='ltr'] {
   gap: 0.5rem;
 }
 .item-modal-ingredients li {
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-size: 0.76rem;
   padding: 0.35rem 0.75rem;
   border-radius: 999px;
@@ -1638,7 +1686,7 @@ html[dir='ltr'] {
   margin-top: 0.3rem;
 }
 .item-modal-price {
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-size: 1.1rem;
   color: var(--gold);
 }
@@ -1676,7 +1724,7 @@ html[dir='ltr'] {
 .item-modal-qty-value {
   min-width: 1.2rem;
   text-align: center;
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-size: 0.9rem;
 }
 
@@ -1687,7 +1735,7 @@ html[dir='ltr'] {
   border: none;
   background: var(--copper-bright);
   color: var(--ink);
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-weight: 600;
   font-size: 0.92rem;
   cursor: pointer;
@@ -1698,7 +1746,7 @@ html[dir='ltr'] {
 }
 
 .item-modal-in-cart {
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-size: 0.76rem;
   color: rgb(var(--parchment-rgb) / 0.6);
   text-align: center;
@@ -1758,7 +1806,7 @@ html[dir='ltr'] {
   padding: 1rem;
 }
 .cart-panel-empty {
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-size: 0.85rem;
   color: rgb(var(--parchment-rgb) / 0.6);
   text-align: center;
@@ -1788,11 +1836,11 @@ html[dir='ltr'] {
   gap: 0.5rem;
 }
 .cart-panel-line-name {
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-size: 0.82rem;
 }
 .cart-panel-line-price {
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-size: 0.72rem;
   color: var(--gold);
   white-space: nowrap;
@@ -1803,7 +1851,7 @@ html[dir='ltr'] {
   justify-content: space-between;
 }
 .cart-panel-remove {
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-size: 0.72rem;
   color: rgb(var(--parchment-rgb) / 0.55);
   background: none;
@@ -1821,7 +1869,7 @@ html[dir='ltr'] {
   margin-top: 0.9rem;
   padding-top: 0.9rem;
   border-top: 1px solid var(--line);
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-weight: 700;
   font-size: 0.9rem;
 }
@@ -1834,7 +1882,7 @@ html[dir='ltr'] {
   margin: 0 auto;
 }
 .gallery-eyebrow {
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.14em;
@@ -1842,7 +1890,7 @@ html[dir='ltr'] {
 }
 .gallery-title {
   margin-top: 0.75rem;
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-weight: 400;
   font-size: clamp(1.9rem, 1.4vw + 1.5rem, 2.75rem);
   color: var(--parchment);
@@ -1948,9 +1996,9 @@ html[dir='ltr'] {
   bottom: 0.9rem;
   right: 0.9rem;
   left: 0.9rem;
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-size: 0.78rem;
-  color: rgb(var(--parchment-rgb) / 0.92);
+  color: rgb(var(--photo-text-rgb) / 0.92);
 }
 /* ---------- Ambiance / "فضای دیوان" ---------- */
 .ambiance {
@@ -1978,7 +2026,7 @@ html[dir='ltr'] {
 }
 
 .ambiance-eyebrow {
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.14em;
@@ -1986,7 +2034,7 @@ html[dir='ltr'] {
 }
 .ambiance-title {
   margin-top: 0.75rem;
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-weight: 400;
   font-size: clamp(1.9rem, 1.4vw + 1.5rem, 2.75rem);
   color: var(--parchment);
@@ -2082,17 +2130,17 @@ html[dir='ltr'] {
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
 }
 .space-card-title {
   font-size: 0.95rem;
   font-weight: 700;
-  color: var(--parchment);
+  color: rgb(var(--photo-text-rgb));
 }
 .space-card-desc {
   font-size: 0.72rem;
   line-height: 1.4;
-  color: rgb(var(--parchment-rgb) / 0.65);
+  color: rgb(var(--photo-text-rgb) / 0.65);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -2152,14 +2200,19 @@ html[dir='ltr'] {
   height: 2rem;
   border-radius: 999px;
   border: 1px solid var(--line);
+  /* Fixed-dark button background over the lightbox photo -- same
+     "photo scrim" reasoning as hero/gallery/space-card, so its icon
+     color must stay fixed too (see --photo-text-rgb), not the
+     theme-flipping --parchment this previously used, which made the
+     close button invisible (dark icon on dark circle) in light theme. */
   background: rgb(28 22 19 / 0.7);
-  color: var(--parchment);
+  color: rgb(var(--photo-text-rgb));
   font-size: 0.9rem;
   cursor: pointer;
 }
 
 .space-lightbox-eyebrow {
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -2167,7 +2220,7 @@ html[dir='ltr'] {
 }
 .space-lightbox-title {
   margin-top: 0.25rem;
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-weight: 700;
   font-size: 1.4rem;
 }
@@ -2217,8 +2270,9 @@ html[dir='ltr'] {
   height: 2.25rem;
   border-radius: 999px;
   border: 1px solid var(--line);
+  /* Same fixed-dark-scrim reasoning as .space-lightbox-close above. */
   background: rgb(28 22 19 / 0.7);
-  color: var(--parchment);
+  color: rgb(var(--photo-text-rgb));
   font-size: 1.3rem;
   line-height: 1;
   cursor: pointer;
@@ -2268,7 +2322,7 @@ html[dir='ltr'] {
 }
 
 .contact-eyebrow {
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.14em;
@@ -2276,7 +2330,7 @@ html[dir='ltr'] {
 }
 .contact-title {
   margin-top: 0.75rem;
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-weight: 400;
   font-size: clamp(1.9rem, 1.4vw + 1.5rem, 2.75rem);
   color: var(--parchment);
@@ -2315,7 +2369,7 @@ html[dir='ltr'] {
 }
 .contact-field {
   display: block;
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-size: 0.85rem;
   color: rgb(var(--parchment-rgb) / 0.8);
 }
@@ -2336,7 +2390,7 @@ html[dir='ltr'] {
   border: 1px solid var(--line);
   background: transparent;
   padding: 0.55rem 0.75rem;
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-size: 0.9rem;
   color: var(--parchment);
 }
@@ -2359,7 +2413,7 @@ html[dir='ltr'] {
   border: none;
   background: var(--copper);
   padding: 0.75rem 1.75rem;
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-size: 0.9rem;
   font-weight: 700;
   color: var(--ink);
@@ -2401,7 +2455,7 @@ html[dir='ltr'] {
   flex-direction: column;
   gap: 0.75rem;
   list-style: none;
-  font-family: var(--font-fa);
+  font-family: var(--font-current);
   font-size: 0.9rem;
   color: rgb(var(--parchment-rgb) / 0.8);
 }
