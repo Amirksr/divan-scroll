@@ -28,29 +28,6 @@
      .subline/.scroll-cue already hardcoded for the same reason, now
      shared instead of re-hardcoded per selector. */
   --photo-text-rgb: 237 230 214;
-
-  --font-display: var(--font-newsreader), 'Newsreader', serif;
-  --font-fa: var(--font-vazirmatn), 'Vazirmatn', sans-serif;
-  --font-body: var(--font-inter), 'Inter', sans-serif;
-  --font-mono: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
-
-  /* Body/content font for whichever language the current page is in.
-     Every selector styling dict-/prop-driven text (headings, card
-     copy, nav links, form fields, etc.) should reference this instead
-     of --font-fa directly -- --font-fa is Vazirmatn, which is correct
-     for the fa route (the default below) but was being force-applied
-     to real English dictionary strings on /en pages too, pre-i18n
-     assumption. The couple of spots that render a *literal*, always-fa
-     glyph regardless of route locale (e.g. the hero's "دیوان" in
-     .title-fa, alongside "DIVAN" in .title-en which already keys off
-     --font-display) intentionally keep using --font-fa directly, not
-     this alias -- they aren't translated content, so they have nothing
-     to switch on. */
-  --font-current: var(--font-fa);
-}
-
-html[lang='en'] {
-  --font-current: var(--font-body);
 }
 
 /*
@@ -91,6 +68,57 @@ html.light {
   --line: rgb(221 203 175 / 0.4);
   --parchment: #1c1613;
   --parchment-rgb: 28 22 19;
+}
+
+/* Font aliases live on `body`, NOT `:root`/`html`, on purpose. next/font
+   (see app/[locale]/layout.tsx) sets the real --font-vazirmatn/
+   --font-newsreader/--font-inter/--font-jetbrains-mono variables via a
+   class on <body> itself -- they don't exist on <html>. A custom
+   property's var() references are resolved at the element where the
+   property is declared, not lazily wherever it's later consumed; declaring
+   --font-fa etc. on :root meant that resolution happened on <html>, where
+   --font-vazirmatn doesn't exist yet, so --font-fa computed to invalid
+   right there and every descendant inherited that invalid result --
+   regardless of --font-vazirmatn being perfectly available lower down on
+   body. (This produced a real bug: WhatFont/getComputedStyle showed every
+   themed selector silently falling back to the browser's UA default,
+   "Times New Roman", even though every individual piece -- the next/font
+   variable itself, --gold, --photo-text-rgb, --parchment above -- checked
+   out fine in isolation.) Declaring these on `body` instead means both
+   sides of every var() reference exist on the same element, which CSS
+   resolves correctly regardless of which of body's several matching rules
+   declares which property first.
+   --font-fa was already written this way before any of this session's
+   changes -- not something introduced by the --font-current work below,
+   just never noticed because nothing had exercised the fa-vs-en split
+   (or WhatFont) against it before. */
+body {
+  --font-display: var(--font-newsreader), 'Newsreader', serif;
+  --font-fa: var(--font-vazirmatn), 'Vazirmatn', sans-serif;
+  --font-body: var(--font-inter), 'Inter', sans-serif;
+  --font-mono: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+
+  /* Body/content font for whichever language the current page is in.
+     Every selector styling dict-/prop-driven text (headings, card
+     copy, nav links, form fields, etc.) should reference this instead
+     of --font-fa directly -- --font-fa is Vazirmatn, which is correct
+     for the fa route (the default below) but was being force-applied
+     to real English dictionary strings on /en pages too, pre-i18n
+     assumption. The couple of spots that render a *literal*, always-fa
+     glyph regardless of route locale (e.g. the hero's "دیوان" in
+     .title-fa, alongside "DIVAN" in .title-en which already keys off
+     --font-display) intentionally keep using --font-fa directly, not
+     this alias -- they aren't translated content, so they have nothing
+     to switch on. */
+  --font-current: var(--font-fa);
+}
+
+/* Targets <body> (via the descendant combinator), not <html> -- same
+   same-element-resolution reasoning as above: --font-body must already
+   be established on body itself for this override to resolve, and
+   lang is only ever set on <html> (see layout.tsx), not body. */
+html[lang='en'] body {
+  --font-current: var(--font-body);
 }
 
 * {

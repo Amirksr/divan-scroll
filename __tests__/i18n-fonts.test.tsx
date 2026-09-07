@@ -24,7 +24,13 @@ describe('locale-aware content font (--font-current)', () => {
   function currentFontFor(lang: 'fa' | 'en'): string {
     document.documentElement.setAttribute('lang', lang);
     document.head.innerHTML = `<style>${css}</style>`;
-    return getComputedStyle(document.documentElement).getPropertyValue('--font-current').trim();
+    document.body.innerHTML = '';
+    // --font-current now lives on `body`, not `:root`/`html` -- see the
+    // comment above the `body { ... }` rule in globals.css for why
+    // (an ancestor-declared alias referencing a var() only available on
+    // a descendant computes to invalid and stays invalid through
+    // inheritance, regardless of what's available further down).
+    return getComputedStyle(document.body).getPropertyValue('--font-current').trim();
   }
 
   afterEach(() => {
