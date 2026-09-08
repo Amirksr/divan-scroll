@@ -977,10 +977,25 @@ body {
 .h-label {
   position: absolute;
   left: 1rem;
+  right: 1rem;
   bottom: 1rem;
   font-family: var(--font-current);
   font-weight: 600;
   font-size: clamp(0.82rem, 1.2vw + 0.6rem, 0.95rem);
+  /* Long English names (no fixed-width CJK/Persian-style compactness)
+     were wrapping to 2 lines and colliding with .h-price above --
+     truncate to one line with an ellipsis instead. `right` bounds the
+     box so overflow/ellipsis has something to measure against, instead
+     of shrink-wrapping to content width like the old left-only
+     positioning did. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* Sits on .h-scrim, which -- like the hero/gallery/space-card scrims
+     -- stays hardcoded dark in both themes (see --photo-text-rgb's
+     definition). This previously had no color of its own and inherited
+     body's theme-flipping color, going dark-on-dark in light theme. */
+  color: rgb(var(--photo-text-rgb));
 }
 
 .h-price {
@@ -1594,9 +1609,15 @@ html[dir='ltr'] {
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  border: 1px solid rgb(var(--parchment-rgb) / 0.3);
+  /* Fixed-dark button background over the item photo -- same "photo
+     scrim" reasoning as .space-lightbox-close/-nav, so its border and
+     icon color must stay fixed too (see --photo-text-rgb), not the
+     theme-flipping --parchment(-rgb) this previously used, which made
+     the close button invisible (dark icon on dark circle) in light
+     theme. */
+  border: 1px solid rgb(var(--photo-text-rgb) / 0.3);
   background: rgb(14 13 12 / 0.55);
-  color: var(--parchment);
+  color: rgb(var(--photo-text-rgb));
   font-size: 0.9rem;
   line-height: 1;
 }
@@ -1653,12 +1674,6 @@ html[dir='ltr'] {
   font-family: var(--font-current);
   font-weight: 400;
   font-size: clamp(1.2rem, 1.4vw + 0.9rem, 1.5rem);
-}
-.item-modal-title-en {
-  font-family: var(--font-body);
-  font-size: 0.8rem;
-  color: rgb(var(--parchment-rgb) / 0.55);
-  margin-top: -0.5rem;
 }
 
 .item-modal-ingredients {

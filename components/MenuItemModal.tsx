@@ -74,7 +74,7 @@ export default function MenuItemModal({ item, onClose, locale, dict }: MenuItemM
     return <dialog ref={dialogRef} className="item-modal" />;
   }
 
-  const ingredients = parseIngredients(item.descFa);
+  const ingredients = parseIngredients(isFa ? item.descFa : item.descEn);
   const category = CATEGORY_META.find((c) => c.slug === item.category);
   const categoryName = category ? (isFa ? category.name : category.nameEn) : undefined;
   const label = isFa ? item.labelFa : item.labelEn;
@@ -123,7 +123,6 @@ export default function MenuItemModal({ item, onClose, locale, dict }: MenuItemM
           <h2 id="item-modal-title" className="item-modal-title">
             {label}
           </h2>
-          {isFa && <p className="item-modal-title-en">{item.labelEn}</p>}
 
           {ingredients.length > 0 && (
             <ul className="item-modal-ingredients">
