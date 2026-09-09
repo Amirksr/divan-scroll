@@ -976,18 +976,24 @@ body {
 
 .h-label {
   position: absolute;
-  left: 1rem;
-  right: 1rem;
+  /* Logical, not physical, so this mirrors correctly for RTL (fa) cards
+     -- .h-card gets dir="rtl"/"ltr" per item in FeaturedMenu.tsx/
+     FullMenuScroll.tsx. inset-inline-start is the left edge for ltr and
+     the right edge for rtl, matching where reading (and .h-price below)
+     starts either way; a physical `left` stayed on the visual left even
+     for rtl cards, which is why fa cards looked scattered relative to
+     the mirrored en layout instead of matching it. */
+  inset-inline: 1rem;
   bottom: 1rem;
   font-family: var(--font-current);
   font-weight: 600;
   font-size: clamp(0.82rem, 1.2vw + 0.6rem, 0.95rem);
   /* Long English names (no fixed-width CJK/Persian-style compactness)
      were wrapping to 2 lines and colliding with .h-price above --
-     truncate to one line with an ellipsis instead. `right` bounds the
-     box so overflow/ellipsis has something to measure against, instead
-     of shrink-wrapping to content width like the old left-only
-     positioning did. */
+     truncate to one line with an ellipsis instead. Bounding both
+     inline edges gives overflow/ellipsis a finite width to measure
+     against, instead of shrink-wrapping to content width like the old
+     left-only positioning did. */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1000,7 +1006,7 @@ body {
 
 .h-price {
   position: absolute;
-  left: 1rem;
+  inset-inline-start: 1rem;
   bottom: 2.4rem;
   font-family: var(--font-current);
   font-size: clamp(0.68rem, 0.9vw + 0.5rem, 0.75rem);
@@ -1195,10 +1201,25 @@ body {
   gap: 0.6rem;
 }
 
-/* Trigger button for the off-canvas MobileNav. Visible at every
-   breakpoint now -- with the reserve CTA and theme toggle living only
-   inside the panel, this is the one way to reach them on any screen
-   size, not just narrow ones. */
+/* Header's own LanguageSwitcher instance (a second copy also lives
+   inside MobileNav's off-canvas panel for <1024px). Hidden by default,
+   shown at the same breakpoint .site-nav switches on and
+   .mobile-nav-toggle switches off below -- the off-canvas panel is a
+   mobile/tablet space-saving affordance, not something a header with
+   room for the full nav link row needs, but losing the toggle can't
+   also mean losing the only way to change language. */
+.site-header-lang {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .site-header-lang {
+    display: flex;
+  }
+}
+
+/* Trigger button for the off-canvas MobileNav. Mobile/tablet only --
+   see .site-header-lang above for why >=1024px switches to that
+   instead rather than just leaving this visible everywhere. */
 .mobile-nav-toggle {
   display: flex;
   align-items: center;
@@ -1210,6 +1231,11 @@ body {
   background: transparent;
   flex-shrink: 0;
   cursor: pointer;
+}
+@media (min-width: 1024px) {
+  .mobile-nav-toggle {
+    display: none;
+  }
 }
 
 .mobile-nav-icon,
@@ -1285,6 +1311,18 @@ html[dir='ltr'] {
   display: flex;
   flex-direction: column;
   width: min(80vw, 22rem);
+  overflow: hidden;
+  /* Rounds the panel's free-floating inner edge (the one facing into
+     the page) while leaving the anchored screen edge square, since a
+     rounded corner flush against the viewport edge would just look
+     like a gap. border-start-end-radius/border-end-end-radius are the
+     inline-end corners -- inline-end is the left edge for RTL (fa) and
+     the right edge for LTR (en), which is exactly the free edge in
+     both cases (see the inset-inline-start note below), so this
+     doesn't need a separate per-dir override the way the transform
+     below does. */
+  border-start-end-radius: 16px;
+  border-end-end-radius: 16px;
   background: var(--ink);
   border-inline-end: 1px solid var(--line);
   box-shadow: 0 0 40px rgb(28 22 19 / 0.4);

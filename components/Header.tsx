@@ -3,6 +3,7 @@ import Logo from './Logo';
 import CartButton from './CartButton';
 import ThemeToggle from './ThemeToggle';
 import MobileNav from './MobileNav';
+import LanguageSwitcher from './LanguageSwitcher';
 import { translate, type Locale, type Messages } from '@/lib/i18n';
 
 /**
@@ -17,6 +18,15 @@ import { translate, type Locale, type Messages } from '@/lib/i18n';
  * persistent bar only holds the logo, the desktop nav row (which nav
  * links still also live in, for >=1024px users), the cart, and the menu
  * toggle -- no separate reserve pill competing for space here anymore.
+ *
+ * The off-canvas toggle itself (.mobile-nav-toggle, in MobileNav) is
+ * CSS-hidden at >=1024px -- that's genuinely a mobile/tablet affordance
+ * for a space-constrained header, not something a desktop nav bar with
+ * room for the full .site-nav link row needs too. LanguageSwitcher is
+ * rendered a second time here (also >=1024px only, via
+ * .site-header-lang) so switching language doesn't become off-canvas-
+ * only once the toggle that used to be the only way to reach it is
+ * gone -- the copy inside MobileNav's panel still covers <1024px.
  */
 export default function Header({ locale, dict }: { locale: Locale; dict: Messages }) {
   const t = (key: string) => translate(dict, key);
@@ -45,6 +55,9 @@ export default function Header({ locale, dict }: { locale: Locale; dict: Message
         </nav>
 
         <div className="site-header-actions">
+          <div className="site-header-lang">
+            <LanguageSwitcher locale={locale} />
+          </div>
           <ThemeToggle dict={dict} />
           <CartButton locale={locale} dict={dict} />
           <MobileNav locale={locale} dict={dict} />

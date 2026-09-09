@@ -34,10 +34,11 @@ describe('scroll-strip card and modal close button: light-theme + long-name fixe
     expect(rule).toMatch(/white-space:\s*nowrap/);
     expect(rule).toMatch(/overflow:\s*hidden/);
     expect(rule).toMatch(/text-overflow:\s*ellipsis/);
-    // Needs a bound on both sides to have a finite width to truncate
-    // against -- left-only positioning shrink-wraps to content instead.
-    expect(rule).toMatch(/\bleft:/);
-    expect(rule).toMatch(/\bright:/);
+    // Needs a bound on both inline edges to have a finite width to
+    // truncate against -- left-only positioning shrink-wraps to content
+    // instead. Logical (inset-inline), not physical (left/right), so
+    // this mirrors correctly for RTL (fa) cards.
+    expect(rule).toMatch(/inset-inline:/);
   });
 
   it('.h-label uses the fixed --photo-text-rgb color (not the theme-flipping parchment/inherited default)', () => {
@@ -49,5 +50,44 @@ describe('scroll-strip card and modal close button: light-theme + long-name fixe
     const rule = ruleFor('.item-modal-close');
     expect(rule).toMatch(/color:\s*rgb\(var\(--photo-text-rgb\)/);
     expect(rule).not.toMatch(/color:\s*var\(--parchment\)/);
+  });
+});
+
+/**
+ * Regression tests for the off-canvas toggle now being mobile/tablet-only
+ * (was visible at every breakpoint), replaced by a header-level
+ * LanguageSwitcher at the same breakpoint .site-nav already switches on,
+ * and the drawer's free inner edge now being rounded.
+ */
+describe('off-canvas toggle breakpoint + drawer corner radius', () => {
+  const cssPath = require('path').join(__dirname, '..', 'app', 'globals.css');
+  const css = require('fs').readFileSync(cssPath, 'utf8');
+  const withoutComments = css.replace(/\/\*[\s\S]*?\*\//g, '');
+
+  it('.mobile-nav-toggle is hidden at the same breakpoint .site-nav (desktop links) appears', () => {
+    const siteNavBp = withoutComments.match(/@media \(min-width:\s*(\d+px)\)\s*{\s*\.site-nav\s*{\s*display:\s*flex/);
+    const toggleHiddenBp = withoutComments.match(/@media \(min-width:\s*(\d+px)\)\s*{\s*\.mobile-nav-toggle\s*{\s*display:\s*none/);
+    expect(siteNavBp).not.toBeNull();
+    expect(toggleHiddenBp).not.toBeNull();
+    expect(toggleHiddenBp![1]).toBe(siteNavBp![1]);
+  });
+
+  it('.site-header-lang appears at the same breakpoint the toggle disappears', () => {
+    const toggleHiddenBp = withoutComments.match(/@media \(min-width:\s*(\d+px)\)\s*{\s*\.mobile-nav-toggle\s*{\s*display:\s*none/);
+    const langShownBp = withoutComments.match(/@media \(min-width:\s*(\d+px)\)\s*{\s*\.site-header-lang\s*{\s*display:\s*flex/);
+    expect(langShownBp).not.toBeNull();
+    expect(langShownBp![1]).toBe(toggleHiddenBp![1]);
+  });
+
+  it('.site-header-lang and .mobile-nav-toggle are both hidden by default (mobile-first)', () => {
+    const langDefault = withoutComments.match(/\.site-header-lang\s*{\s*display:\s*none;\s*}/);
+    expect(langDefault).not.toBeNull();
+  });
+
+  it('.mobile-nav-drawer rounds its free inline-end edge (logical, so it flips correctly per dir)', () => {
+    const match = withoutComments.match(/\.mobile-nav-drawer\s*{([^}]*)}/);
+    expect(match).not.toBeNull();
+    expect(match![1]).toMatch(/border-start-end-radius:\s*\d/);
+    expect(match![1]).toMatch(/border-end-end-radius:\s*\d/);
   });
 });
