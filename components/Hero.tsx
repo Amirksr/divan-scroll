@@ -14,6 +14,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function Hero({ dict }: { dict: Messages }) {
   const rootRef = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const reducedMotion = useReducedMotion();
   const t = (key: string) => translate(dict, key);
 
@@ -35,17 +36,30 @@ export default function Hero({ dict }: { dict: Messages }) {
         .to('.scroll-cue', { opacity: 1, duration: 0.6 }, 1.0);
 
       if (!reducedMotion) {
-        gsap.timeline({
+        const videoProgress = { value: 0 };
+        const syncVideo = () => {
+          const video = videoRef.current;
+          if (!video || !Number.isFinite(video.duration) || video.duration <= 0) return;
+          video.currentTime = videoProgress.value * video.duration;
+        };
+        const video = videoRef.current;
+        video?.addEventListener('loadedmetadata', syncVideo);
+        syncVideo();
+
+        const scrollTimeline = gsap.timeline({
           scrollTrigger: {
             trigger: rootRef.current,
             start: 'top top',
-            end: '+=90%',
+            end: '+=180%',
             scrub: 0.6,
             pin: true,
             anticipatePin: 1,
           },
-        })
-          .to('.title-fa', { opacity: 0, filter: 'blur(8px)', y: -24, scale: 0.92, duration: 1 })
+        });
+
+        scrollTimeline
+          .to(videoProgress, { value: 1, duration: 1, ease: 'none', onUpdate: syncVideo }, 0)
+          .to('.title-fa', { opacity: 0, filter: 'blur(8px)', y: -24, scale: 0.92, duration: 1 }, 0)
           .to('.title-en', { opacity: 1, filter: 'blur(0px)', duration: 1 }, '<0.15')
           .to('.scroll-cue', { opacity: 0, duration: 0.3 }, 0);
 
@@ -62,7 +76,7 @@ export default function Hero({ dict }: { dict: Messages }) {
           const crossfadeTrigger = ScrollTrigger.create({
             trigger: rootRef.current,
             start: 'top top',
-            end: '+=90%',
+            end: '+=180%',
             scrub: 0.6,
             onUpdate: (self) => {
               gsap.set('.subline', { opacity: getParagraphOpacity(self.progress, 0, 2) });
@@ -71,6 +85,10 @@ export default function Hero({ dict }: { dict: Messages }) {
           });
           return () => crossfadeTrigger.kill();
         });
+
+        return () => {
+          video?.removeEventListener('loadedmetadata', syncVideo);
+        };
       } else {
         gsap.set('.title-fa', { opacity: 0.4 });
         gsap.set('.title-en', { opacity: 1, filter: 'blur(0px)' });
@@ -82,15 +100,27 @@ export default function Hero({ dict }: { dict: Messages }) {
 
   return (
     <section ref={rootRef} className="hero" id="hero">
-      <Image
-        src="/images/hero/exterior.webp"
-        alt=""
-        aria-hidden="true"
-        fill
-        priority
-        sizes="100vw"
-        className="hero-bg-photo"
-      />
+      {reducedMotion ? (
+        <Image
+          src="/images/hero/exterior.webp"
+          alt=""
+          aria-hidden="true"
+          fill
+          priority
+          sizes="100vw"
+          className="hero-bg-photo"
+        />
+      ) : (
+        <video
+          ref={videoRef}
+          className="hero-bg-photo"
+          src="/videos/divan-interior-hero.mp4"
+          muted
+          playsInline
+          preload="auto"
+          aria-hidden="true"
+        />
+      )}
       <div className="hero-bg-scrim" aria-hidden="true" />
       <SmokeCanvas active={!reducedMotion} className="smoke-canvas" />
       <div className="hero-inner">
