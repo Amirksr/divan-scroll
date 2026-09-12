@@ -207,6 +207,25 @@ body {
 }
 
 .hero-bg-photo {
+  /* Previously this class relied entirely on next/image's `fill` prop
+     to become absolutely positioned and fill .hero -- fill injects that
+     via an inline style, so this class itself never needed position
+     rules. Once the hero background switched to a plain <video> (no
+     `fill` equivalent), the video had no sizing/positioning of its own
+     and rendered in-flow inside .hero's flex row at its raw intrinsic
+     video dimensions. Two visible symptoms: (1) the video appeared tiny
+     / mis-cropped instead of filling the viewport, reading as "the
+     scroll video doesn't work"; (2) because it was a real flex sibling
+     of .hero-inner, flexbox mirrors row order under RTL, so the video
+     and the hero text swapped sides between the fa (rtl) and en (ltr)
+     locales. Declaring the sizing/positioning here (rather than back on
+     the <video> tag only) makes it locale- and element-agnostic --
+     Image's `fill` inline style and this class now simply agree. */
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   opacity: 0.5;
   pointer-events: none;

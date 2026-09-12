@@ -9,6 +9,7 @@ import { getParagraphOpacity } from '@/lib/story-utils';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useIsomorphicLayoutEffect } from '@/hooks/useIsomorphicLayoutEffect';
 import { translate, type Messages } from '@/lib/i18n';
+import { syncVideoTime, primeVideoPlayback } from '@/lib/video-scrub';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -37,14 +38,13 @@ export default function Hero({ dict }: { dict: Messages }) {
 
       if (!reducedMotion) {
         const videoProgress = { value: 0 };
-        const syncVideo = () => {
-          const video = videoRef.current;
-          if (!video || !Number.isFinite(video.duration) || video.duration <= 0) return;
-          video.currentTime = videoProgress.value * video.duration;
-        };
         const video = videoRef.current;
+        const syncVideo = () => syncVideoTime(video, videoProgress.value);
+        const primeVideo = () => primeVideoPlayback(video);
         video?.addEventListener('loadedmetadata', syncVideo);
+        video?.addEventListener('loadedmetadata', primeVideo);
         syncVideo();
+        primeVideo();
 
         const scrollTimeline = gsap.timeline({
           scrollTrigger: {
@@ -88,6 +88,7 @@ export default function Hero({ dict }: { dict: Messages }) {
 
         return () => {
           video?.removeEventListener('loadedmetadata', syncVideo);
+          video?.removeEventListener('loadedmetadata', primeVideo);
         };
       } else {
         gsap.set('.title-fa', { opacity: 0.4 });
@@ -115,6 +116,7 @@ export default function Hero({ dict }: { dict: Messages }) {
           ref={videoRef}
           className="hero-bg-photo"
           src="/videos/divan-interior-hero.mp4"
+          poster="/images/hero/exterior.webp"
           muted
           playsInline
           preload="auto"
