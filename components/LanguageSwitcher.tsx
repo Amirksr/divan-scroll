@@ -13,6 +13,15 @@ export function swapLocaleInPath(pathname: string, nextLocale: Locale): string {
 
 const LABELS: Record<Locale, string> = { fa: 'فارسی', en: 'EN' };
 
+/** Always matches the literal script of LABELS[loc] (Farsi/Latin), not
+ * whichever locale the current page happens to be in -- see the CSS
+ * comment above .language-switcher-link for why this can't just be
+ * --font-current like the rest of the site's locale-aware text. */
+const SCRIPT_CLASS: Record<Locale, string> = {
+  fa: 'language-switcher-link--fa',
+  en: 'language-switcher-link--en',
+};
+
 export default function LanguageSwitcher({ locale }: { locale: Locale }) {
   const pathname = usePathname() ?? `/${locale}`;
 
@@ -27,7 +36,14 @@ export default function LanguageSwitcher({ locale }: { locale: Locale }) {
           )}
           <Link
             href={swapLocaleInPath(pathname, loc)}
-            className={loc === locale ? 'language-switcher-link language-switcher-link--active focus-ring' : 'language-switcher-link focus-ring'}
+            className={[
+              'language-switcher-link',
+              SCRIPT_CLASS[loc],
+              loc === locale && 'language-switcher-link--active',
+              'focus-ring',
+            ]
+              .filter(Boolean)
+              .join(' ')}
             aria-current={loc === locale ? 'true' : undefined}
           >
             {LABELS[loc]}

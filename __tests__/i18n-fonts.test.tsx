@@ -63,6 +63,39 @@ describe('locale-aware content font (--font-current)', () => {
     '.space-card-body',
     '.contact-title',
     '.contact-input',
+    // Added for the post-launch "every page but Home looks inconsistent,
+    // and the footer still isn't fixed" bug report: these had either no
+    // font-family at all (falling through to body's --font-body, Inter)
+    // or were hardcoded to --font-mono/literal `monospace` (no Farsi
+    // glyph coverage) despite rendering real dict-/data-driven content
+    // that can be Farsi. Spans Home (.categories-desc, .gallery-description,
+    // .stat-value/.stat-label, .ambiance-hours-*, .h-cat), About
+    // (.about-team-role, .about-team-avatar), Contact (.contact-form-title,
+    // .contact-submitted-*, .contact-info-title, .contact-description,
+    // .contact-map-note), Menu (.h-cat again), and the Footer.
+    '.footer-tagline',
+    '.footer-heading',
+    '.footer-list',
+    '.footer-newsletter-desc',
+    '.footer-bottom',
+    '.newsletter-input',
+    '.eyebrow-static',
+    '.about-team-role',
+    '.about-team-avatar',
+    '.categories-desc',
+    '.contact-form-title',
+    '.contact-submitted-headline',
+    '.contact-submitted-body',
+    '.contact-info-title',
+    '.contact-description',
+    '.contact-map-note',
+    '.h-cat',
+    '.gallery-description',
+    '.ambiance-hours-row',
+    '.ambiance-hours-title',
+    '.ambiance-hours-time',
+    '.stat-value',
+    '.stat-label',
   ];
 
   it.each(contentSelectors)('%s uses the locale-aware --font-current, not the fa-only literal', (selector) => {
@@ -77,7 +110,7 @@ describe('locale-aware content font (--font-current)', () => {
   // regardless of route locale -- they have no translated counterpart to
   // switch to, so they must keep referencing --font-fa directly rather
   // than the locale-aware alias.
-  const literalFaSelectors = ['.title-fa', '.logo-wordmark'];
+  const literalFaSelectors = ['.title-fa', '.logo-wordmark', '.language-switcher-link--fa'];
 
   it.each(literalFaSelectors)('%s keeps the literal --font-fa (always-Farsi content, not dict-driven)', (selector) => {
     const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -85,5 +118,13 @@ describe('locale-aware content font (--font-current)', () => {
     const match = css.match(rule);
     expect(match).not.toBeNull();
     expect(match![0]).toMatch(/font-family:\s*var\(--font-fa\)/);
+  });
+
+  // .language-switcher-link--en renders the literal "EN" -- always Latin
+  // -- regardless of route locale, mirroring .title-en/.logo-wordmark--en.
+  it('.language-switcher-link--en keeps the literal --font-body (always-Latin content, not dict-driven)', () => {
+    const match = css.match(/\.language-switcher-link--en\s*{[^}]*}/);
+    expect(match).not.toBeNull();
+    expect(match![0]).toMatch(/font-family:\s*var\(--font-body\)/);
   });
 });

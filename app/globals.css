@@ -520,6 +520,7 @@ body {
   margin: 0.75rem 0 1rem;
 }
 .categories-desc {
+  font-family: var(--font-current);
   max-width: 34rem;
   margin: 0 0 3rem;
   color: rgb(var(--parchment-rgb) / 0.65);
@@ -708,12 +709,22 @@ body {
   text-align: center;
 }
 .stat-value {
-  font-family: var(--font-mono);
+  /* formatStatValue() (lib/stats-data.ts) uses Intl.NumberFormat('fa-IR', ...)
+     for the fa locale, which renders Persian-Indic digits (۰-۹), not
+     ASCII 0-9 -- the same convention formatToman() already uses for
+     prices elsewhere in the app (.h-price etc., which correctly use
+     --font-current). --font-mono (JetBrains Mono) has no Persian-Indic
+     digit glyphs, so those digits were silently falling back to a
+     system font. --font-current (Vazirmatn on /fa) covers them, same
+     as it already does for prices; tabular-nums keeps digit widths
+     stable during the count-up animation regardless of font. */
+  font-family: var(--font-current);
   font-size: 2rem;
   color: var(--gold);
   font-variant-numeric: tabular-nums;
 }
 .stat-label {
+  font-family: var(--font-current);
   margin-top: 0.5rem;
   font-size: 0.72rem;
   text-transform: uppercase;
@@ -879,6 +890,12 @@ body {
 }
 
 .about-team-avatar {
+  /* Renders member.name.slice(0, 1) -- a real glyph from whichever
+     script the current locale's team member names are in (Farsi on
+     /fa, Latin on /en), not a fixed symbol -- so this needs the same
+     locale-aware font as the name itself, not --font-mono (which has
+     no Farsi coverage and was silently falling back to a system font
+     for every fa-route initial). */
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -887,7 +904,7 @@ body {
   height: 3.25rem;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--copper), var(--ink));
-  font-family: var(--font-mono);
+  font-family: var(--font-current);
   font-size: 0.85rem;
   color: rgb(var(--parchment-rgb) / 0.85);
 }
@@ -899,6 +916,7 @@ body {
 }
 
 .about-team-role {
+  font-family: var(--font-current);
   margin-top: 0.2rem;
   font-size: 0.78rem;
   color: rgb(var(--parchment-rgb) / 0.55);
@@ -921,6 +939,7 @@ body {
 }
 
 .eyebrow-static {
+  font-family: var(--font-current);
   font-size: 0.72rem;
   letter-spacing: 0.32em;
   text-transform: uppercase;
@@ -985,6 +1004,7 @@ body {
 }
 
 .h-cat {
+  font-family: var(--font-current);
   position: absolute;
   right: 1rem;
   top: 1rem;
@@ -1504,18 +1524,21 @@ html[dir='ltr'] {
   color: var(--parchment);
 }
 .footer-tagline {
+  font-family: var(--font-current);
   margin-top: 0.75rem;
   max-width: 22rem;
   font-size: 0.9rem;
   color: rgb(var(--parchment-rgb) / 0.6);
 }
 .footer-heading {
+  font-family: var(--font-current);
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.14em;
   color: var(--copper-bright);
 }
 .footer-list {
+  font-family: var(--font-current);
   margin-top: 1rem;
   display: flex;
   flex-direction: column;
@@ -1537,6 +1560,7 @@ html[dir='ltr'] {
 }
 
 .footer-newsletter-desc {
+  font-family: var(--font-current);
   margin-top: 1rem;
   font-size: 0.9rem;
   color: rgb(var(--parchment-rgb) / 0.6);
@@ -1546,6 +1570,13 @@ html[dir='ltr'] {
   display: flex;
 }
 .newsletter-input {
+  /* <input> elements don't inherit font-family from ancestors the way
+     <p>/<li>/<a> do -- browsers apply their own UA-stylesheet default
+     font to form controls, so without this the field rendered in a
+     system font that had nothing to do with the site's fonts (in
+     either locale), regardless of --font-current being set everywhere
+     around it. */
+  font-family: var(--font-current);
   flex: 1;
   min-width: 0;
   border: 1px solid var(--line);
@@ -1578,6 +1609,7 @@ html[dir='ltr'] {
   color: var(--ink);
 }
 .footer-bottom {
+  font-family: var(--font-current);
   margin-top: 3.5rem;
   padding-top: 1.5rem;
   border-top: 1px solid var(--line);
@@ -1966,6 +1998,7 @@ html[dir='ltr'] {
   color: var(--parchment);
 }
 .gallery-description {
+  font-family: var(--font-current);
   margin-top: 0.75rem;
   max-width: 34rem;
   color: rgb(var(--parchment-rgb) / 0.7);
@@ -2122,21 +2155,26 @@ html[dir='ltr'] {
   padding: 1.25rem;
 }
 .ambiance-hours-title {
-  font-family: monospace;
+  font-family: var(--font-current);
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--copper-bright, #d9a066);
 }
+/* font-family declared here (not just on .ambiance-hours-time below) so the
+   unclassed day-name <span> (t('hours.everyday')/t('hours.weekend')) that
+   sits alongside .ambiance-hours-time in the same row also gets it, rather
+   than falling through to body's --font-body (Inter). */
 .ambiance-hours-row {
   margin-top: 0.6rem;
   display: flex;
   justify-content: space-between;
+  font-family: var(--font-current);
   font-size: 0.85rem;
   color: rgb(var(--parchment-rgb) / 0.8);
 }
 .ambiance-hours-time {
-  font-family: monospace;
+  font-family: var(--font-current);
 }
 
 .space-card-grid {
@@ -2406,6 +2444,7 @@ html[dir='ltr'] {
   color: var(--parchment);
 }
 .contact-description {
+  font-family: var(--font-current);
   margin-top: 0.75rem;
   max-width: 34rem;
   color: rgb(var(--parchment-rgb) / 0.7);
@@ -2431,7 +2470,7 @@ html[dir='ltr'] {
   gap: 1rem;
 }
 .contact-form-title {
-  font-family: var(--font-mono);
+  font-family: var(--font-current);
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -2501,11 +2540,12 @@ html[dir='ltr'] {
   color: var(--parchment);
 }
 .contact-submitted-headline {
-  font-family: var(--font-mono);
+  font-family: var(--font-current);
   font-size: 0.85rem;
   color: var(--gold);
 }
 .contact-submitted-body {
+  font-family: var(--font-current);
   margin-top: 0.5rem;
   font-size: 0.85rem;
   color: rgb(var(--parchment-rgb) / 0.7);
@@ -2513,7 +2553,7 @@ html[dir='ltr'] {
 
 /* Info column */
 .contact-info-title {
-  font-family: var(--font-mono);
+  font-family: var(--font-current);
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -2551,6 +2591,7 @@ html[dir='ltr'] {
   border: 0;
 }
 .contact-map-note {
+  font-family: var(--font-current);
   margin-top: 0.75rem;
   font-size: 0.75rem;
   color: rgb(var(--parchment-rgb) / 0.5);
@@ -2568,6 +2609,12 @@ html[dir='ltr'] {
   color: rgb(var(--parchment-rgb) / 0.35);
 }
 .language-switcher-link {
+  /* No shared font-family here on purpose -- unlike every other
+     locale-aware selector in this file, this one always renders BOTH
+     scripts side by side (the fa option's label is the literal word
+     "فارسی", the en option's is the literal "EN") regardless of which
+     locale the current page is in, so a single --font-current can't be
+     right for both at once. See .language-switcher-link--fa/--en. */
   color: rgb(var(--parchment-rgb) / 0.6);
   text-decoration: none;
   letter-spacing: 0.02em;
@@ -2577,4 +2624,15 @@ html[dir='ltr'] {
 }
 .language-switcher-link--active {
   color: var(--gold);
+}
+/* Renders the literal word "فارسی" -- always Farsi script, regardless of
+   the current route's locale -- so it needs --font-fa specifically, the
+   same way .title-fa/.logo-wordmark do for other always-Farsi glyphs. */
+.language-switcher-link--fa {
+  font-family: var(--font-fa);
+}
+/* Renders the literal "EN" -- always Latin -- so it follows --font-body
+   the same way .title-en/.logo-wordmark--en do for always-Latin glyphs. */
+.language-switcher-link--en {
+  font-family: var(--font-body);
 }
