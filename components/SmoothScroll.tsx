@@ -7,6 +7,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { lenisInstance } from '@/lib/lenis-instance';
+import { stripLocaleFromPath } from '@/lib/i18n';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -116,9 +117,30 @@ export default function SmoothScroll() {
   // freshly-navigated page can jump or fight the leftover state from the
   // previous page. Force an immediate (non-animated) resync on every
   // pathname change.
+  //
+  // Keyed on the LOCALE-STRIPPED path, not the raw pathname: switching
+  // language (/fa/menu -> /en/menu) changes the raw pathname but is the
+  // same page, and forcing scroll to 0 there threw the reader back to the
+  // top of a page they were partway through. Paired with scroll={false}
+  // on LanguageSwitcher's links, which stops Next.js doing the same thing
+  // natively.
+  //
+  // The first-run guard matters just as much as the key: <html> lives in
+  // app/[locale]/layout.tsx, so changing the [locale] segment remounts
+  // that layout -- and this component with it. On a remount this effect
+  // runs as a fresh mount, which would scroll to 0 regardless of what the
+  // key says. Skipping the first run means the reset only ever fires on a
+  // genuine in-place page change, and costs nothing on a real first load
+  // (the browser is already at the top there).
+  const pageKey = stripLocaleFromPath(pathname ?? '/');
+  const isFirstRun = useRef(true);
   useEffect(() => {
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      return;
+    }
     lenisRef.current?.scrollTo(0, { immediate: true });
-  }, [pathname]);
+  }, [pageKey]);
 
   return null;
 }

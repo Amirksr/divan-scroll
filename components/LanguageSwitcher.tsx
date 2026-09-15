@@ -36,6 +36,12 @@ export default function LanguageSwitcher({ locale }: { locale: Locale }) {
           )}
           <Link
             href={swapLocaleInPath(pathname, loc)}
+            // Switching language is not a page change -- it re-renders the
+            // page the reader is already partway through. Next.js scrolls
+            // to the top on navigation by default, which threw away their
+            // position; SmoothScroll's own reset is likewise keyed on the
+            // locale-stripped path so Lenis doesn't undo this either.
+            scroll={false}
             className={[
               'language-switcher-link',
               SCRIPT_CLASS[loc],

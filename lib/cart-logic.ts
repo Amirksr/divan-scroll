@@ -11,6 +11,7 @@ export type CartAction =
   | { type: 'ADD_ITEM'; id: string; quantity?: number }
   | { type: 'REMOVE_ITEM'; id: string }
   | { type: 'SET_QUANTITY'; id: string; quantity: number }
+  | { type: 'REPLACE'; cart: CartState }
   | { type: 'CLEAR' };
 
 /**
@@ -52,6 +53,13 @@ export function cartReducer(state: CartState, action: CartAction): CartState {
         line.id === action.id ? { ...line, quantity: action.quantity } : line
       );
     }
+    case 'REPLACE':
+      // Wholesale swap, used to restore a persisted cart on mount. The
+      // incoming array is assumed already validated (see
+      // lib/cart-storage.ts) -- this reducer stays pure and does no
+      // filtering of its own, matching how the other cases treat their
+      // payloads.
+      return action.cart;
     case 'CLEAR':
       return [];
     default:

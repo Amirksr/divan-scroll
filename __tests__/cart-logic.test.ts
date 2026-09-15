@@ -119,6 +119,26 @@ describe('cartReducer', () => {
     expect(cartReducer(state, { type: 'CLEAR' })).toEqual([]);
   });
 
+  // REPLACE exists so CartProvider can restore a cart persisted in
+  // sessionStorage -- needed because <html> (and the provider with it)
+  // lives in app/[locale]/layout.tsx, so switching language remounts the
+  // layout and would otherwise wipe an in-progress order.
+  it('REPLACE swaps the whole cart for the given one', () => {
+    const state: CartState = [{ id: 'a', quantity: 1 }];
+    const restored: CartState = [
+      { id: 'b', quantity: 2 },
+      { id: 'c', quantity: 5 },
+    ];
+    expect(cartReducer(state, { type: 'REPLACE', cart: restored })).toEqual(restored);
+  });
+
+  it('REPLACE can empty a cart and can restore into an empty one', () => {
+    expect(cartReducer([{ id: 'a', quantity: 1 }], { type: 'REPLACE', cart: [] })).toEqual([]);
+    expect(cartReducer([], { type: 'REPLACE', cart: [{ id: 'a', quantity: 3 }] })).toEqual([
+      { id: 'a', quantity: 3 },
+    ]);
+  });
+
   it('an unknown action type returns state unchanged', () => {
     const state: CartState = [{ id: 'a', quantity: 1 }];
     // @ts-expect-error -- deliberately testing the default/fallback branch

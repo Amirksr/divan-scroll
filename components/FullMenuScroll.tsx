@@ -7,7 +7,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { MENU_ITEMS, formatToman, type MenuItem } from '@/lib/menu-data';
 import { CATEGORY_META, getOrderedAvailableCategories, type CategorySlug } from '@/lib/categories-data';
 import { getHorizontalScrollDistance, getCachedByWidth, type WidthCachedValue } from '@/lib/scroll-utils';
-import { pickActiveCategory, type CategoryProbe } from '@/lib/category-scroll-utils';
+import { pickActiveCategory, parseCategoryHash, type CategoryProbe } from '@/lib/category-scroll-utils';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useIsomorphicLayoutEffect } from '@/hooks/useIsomorphicLayoutEffect';
 import { lenisInstance } from '@/lib/lenis-instance';
@@ -184,14 +184,10 @@ export default function FullMenuScroll({ locale, dict }: { locale: Locale; dict:
     return () => observer.disconnect();
   }, []);
 
-  // Click-to-jump: bring a category's first card into view. Doesn't lock
-  // out free scrolling/mouse-wheel afterward -- it's just a shortcut that
-  // lands the user at the same scroll position they'd reach by scrolling
-  // there themselves, so everything else (tab highlighting, further
-  // horizontal scroll) keeps working exactly as before.
-  const handleTabClick = (slug: CategorySlug) => {
+  const jumpToCategory = (slug: CategorySlug, options?: { immediate?: boolean }) => {
     const probe = probeRefs.current[slug];
     if (!probe) return;
+    const immediate = options?.immediate ?? false;
 
     if (reducedMotion || !scrollTriggerRef.current) {
       // No pin in this mode -- scroll the native horizontal container
@@ -199,7 +195,10 @@ export default function FullMenuScroll({ locale, dict }: { locale: Locale; dict:
       // page vertically, which we don't want here).
       const viewportEl = viewportRef.current;
       if (!viewportEl) return;
-      viewportEl.scrollTo({ left: probe.offsetLeft - getSidePadding(), behavior: 'smooth' });
+      viewportEl.scrollTo({
+        left: probe.offsetLeft - getSidePadding(),
+        behavior: immediate ? 'auto' : 'smooth',
+      });
       return;
     }
 
@@ -213,11 +212,70 @@ export default function FullMenuScroll({ locale, dict }: { locale: Locale; dict:
     // Lenis owns scroll state once active -- a raw window.scrollTo here
     // would fight its internal target/velocity and jank or snap back.
     if (lenisInstance.current) {
-      lenisInstance.current.scrollTo(targetY, { duration: 1.2 });
+      lenisInstance.current.scrollTo(targetY, immediate ? { immediate: true } : { duration: 1.2 });
     } else {
-      window.scrollTo({ top: targetY, behavior: 'smooth' });
+      window.scrollTo({ top: targetY, behavior: immediate ? 'auto' : 'smooth' });
     }
   };
+
+  // Click-to-jump: bring a category's first card into view. Doesn't lock
+  // out free scrolling/mouse-wheel afterward -- it's just a shortcut that
+  // lands the user at the same scroll position they'd reach by scrolling
+  // there themselves, so everything else (tab highlighting, further
+  // horizontal scroll) keeps working exactly as before.
+  const handleTabClick = (slug: CategorySlug) => jumpToCategory(slug);
+
+  // Kept in a ref so the deep-link effect below can call the latest
+  // version without re-running (and re-jumping) on every render. Assigned
+  // in an effect rather than during render, so render stays side-effect
+  // free; the mount-time value is already correct for the deep link,
+  // which fires from a rAF callback after effects have run.
+  const jumpToCategoryRef = useRef(jumpToCategory);
+  useEffect(() => {
+    jumpToCategoryRef.current = jumpToCategory;
+  });
+
+  // Deep link from the home page's category cards, which link to
+  // /{locale}/menu#cat-{slug}. The matching id lives on the category TAB,
+  // so the browser's native hash handling scrolled that tab into view but
+  // left the horizontal track at the very beginning -- the reader landed
+  // on the menu page and still had to pick the category by hand, which is
+  // exactly what was reported. Drive the same jump the tab click does.
+  //
+  // Runs as a plain effect (not layout) so the pin ScrollTrigger set up in
+  // the layout effect above already exists, then waits a frame and forces
+  // a refresh first: the card images are still settling on first paint,
+  // and jumping off a stale pin distance lands at the wrong offset.
+  const didDeepLinkRef = useRef(false);
+  useEffect(() => {
+    // Once per mount only, and the flag is set when the jump actually
+    // RUNS, not when it's scheduled. useReducedMotion starts false and
+    // resolves the real value in a layout effect, so a reduced-motion
+    // user flips this effect's dependency immediately after mount --
+    // claiming the flag up front would let that cleanup cancel the
+    // pending frame and then skip the re-run, and the deep link would
+    // never fire for them at all. Guarding on execution instead means
+    // the re-run does the jump, and a second jump can't happen after.
+    if (didDeepLinkRef.current) return;
+
+    const slug = parseCategoryHash(window.location.hash);
+    if (!slug) return;
+    if (!availableCategories.some((c) => c.slug === slug)) return;
+
+    let secondFrame = 0;
+    const firstFrame = requestAnimationFrame(() => {
+      ScrollTrigger.refresh();
+      secondFrame = requestAnimationFrame(() => {
+        didDeepLinkRef.current = true;
+        jumpToCategoryRef.current(slug as CategorySlug, { immediate: true });
+      });
+    });
+
+    return () => {
+      cancelAnimationFrame(firstFrame);
+      cancelAnimationFrame(secondFrame);
+    };
+  }, [reducedMotion]);
 
   return (
     <>

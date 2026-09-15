@@ -27,3 +27,20 @@ export function pickActiveCategory(probes: CategoryProbe[], fallback?: string): 
   if (visible.length === 0) return fallback;
   return visible.reduce((leftmost, p) => (p.left < leftmost.left ? p : leftmost)).category;
 }
+
+/**
+ * Extracts a category slug from a location hash of the form "#cat-<slug>",
+ * as linked from the home page's category cards
+ * (`/{locale}/menu#cat-{slug}`). Returns undefined for an absent,
+ * empty, or differently-shaped hash.
+ *
+ * Validation against the real category list is left to the caller, which
+ * knows which categories currently have content -- this only handles the
+ * string shape, so it stays pure and testable without importing menu data.
+ */
+export function parseCategoryHash(hash: string): string | undefined {
+  const withoutHash = hash.startsWith('#') ? hash.slice(1) : hash;
+  if (!withoutHash.startsWith('cat-')) return undefined;
+  const slug = withoutHash.slice('cat-'.length);
+  return slug.length > 0 ? slug : undefined;
+}

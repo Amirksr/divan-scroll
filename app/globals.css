@@ -1876,9 +1876,15 @@ html[dir='ltr'] {
   height: 1.15rem;
 }
 .cart-button-badge {
+  /* Same directional bug as .cart-panel below: `left: -0.35rem` put the
+     count badge on the button's outer top corner under RTL but on its
+     inner corner under LTR (where it overlapped the adjacent header
+     control). inset-inline-END (not -start) is the one that preserves
+     the existing, correct /fa placement -- in RTL inline-end resolves to
+     the left edge -- while mirroring it to the right edge on /en. */
   position: absolute;
   top: -0.35rem;
-  left: -0.35rem;
+  inset-inline-end: -0.35rem;
   min-width: 1.1rem;
   height: 1.1rem;
   padding: 0 0.25rem;
@@ -1894,9 +1900,19 @@ html[dir='ltr'] {
 }
 
 .cart-panel {
+  /* Anchored to the button's inline-END edge, not a hardcoded `left: 0`.
+     The header mirrors under RTL, so the cart button sits near the left
+     viewport edge on /fa but near the right edge on /en. With `left: 0`
+     the panel always grew rightward from the button, which is fine on
+     /fa but ran straight off the right edge of the screen on /en --
+     the reported "half the panel is cut off" bug. inset-inline-end
+     resolves against the containing block's direction (.cart-button-wrap,
+     which inherits <html dir>), so the panel opens inward on both:
+     leftward from the button's right edge in LTR, rightward from its
+     left edge in RTL. */
   position: absolute;
   top: calc(100% + 0.6rem);
-  left: 0;
+  inset-inline-end: 0;
   z-index: 50;
   width: min(320px, calc(100vw - 2rem));
   max-height: 70vh;
