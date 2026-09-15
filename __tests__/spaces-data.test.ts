@@ -31,9 +31,22 @@ describe('spaces-data', () => {
     }
   });
 
-  it('every cover image points under /images/gallery/, matching the gallery section\'s photos', () => {
+  // This previously asserted the opposite -- that each cover pointed at
+  // `/images/gallery/${key}.webp`. That was the bug, not the contract:
+  // those gallery files are byte-identical to space-photos/${key}-1.webp,
+  // so the same four photographs appeared twice on one page, once as
+  // space cards and once in the gallery strip. Covers now come from the
+  // space's own photo set instead; see __tests__/space-covers.test.ts for
+  // the hash-level check that no cover duplicates a gallery image.
+  it('every cover image comes from that space\'s own photo set', () => {
     for (const space of SPACES) {
-      expect(space.coverImage).toBe(`/images/gallery/${space.key}.webp`);
+      expect(space.coverImage.startsWith(`/images/space-photos/${space.key}-`)).toBe(true);
+    }
+  });
+
+  it('every cover image is also listed in that space\'s photos', () => {
+    for (const space of SPACES) {
+      expect(space.photos.map((p) => p.src)).toContain(space.coverImage);
     }
   });
 

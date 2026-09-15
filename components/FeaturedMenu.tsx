@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { getFeaturedItems, formatToman, type MenuItem } from '@/lib/menu-data';
+import { getFeaturedItemsInDisplayOrder, formatToman, type MenuItem } from '@/lib/menu-data';
 import { CATEGORY_META } from '@/lib/categories-data';
 import { getHorizontalScrollDistance, getCachedByWidth, type WidthCachedValue } from '@/lib/scroll-utils';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
@@ -15,7 +15,7 @@ import { translate, type Locale, type Messages } from '@/lib/i18n';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const items = getFeaturedItems();
+const items = getFeaturedItemsInDisplayOrder();
 
 export default function FeaturedMenu({ locale, dict }: { locale: Locale; dict: Messages }) {
   const sectionRef = useRef<HTMLElement>(null);

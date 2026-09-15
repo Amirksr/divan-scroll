@@ -1,3 +1,6 @@
+import { spaceOutSimilarWithinCategory } from './featured-order';
+import { getVisualGroup } from './visual-groups';
+
 export type MenuCategory = 'brunch' | 'cold' | 'tea' | 'breakfast' | 'pastry' | 'coffee';
 // All 6 real categories are now covered -- 86 of 87 real DivanCafe items
 // have local photography (only "ترکی" / Turkish coffee has no photo
@@ -1242,6 +1245,24 @@ export const MENU_ITEMS: MenuItem[] = [
 
 export function getFeaturedItems(items: MenuItem[] = MENU_ITEMS): MenuItem[] {
   return items.filter((item) => item.featured);
+}
+
+/**
+ * The featured strip in display order: the same items getFeaturedItems
+ * returns, but with lookalike photography spread apart inside each
+ * category's existing slots (see lib/featured-order.ts). Several featured
+ * dishes are shot identically -- the two kababs, the three khoresh, ferni
+ * and komaj, cortado and cappuccino -- and landed adjacent, which made the
+ * strip read as repeated cards. Kept separate from getFeaturedItems so the
+ * raw "which items are featured" question stays answerable without the
+ * presentation concern attached.
+ */
+export function getFeaturedItemsInDisplayOrder(items: MenuItem[] = MENU_ITEMS): MenuItem[] {
+  return spaceOutSimilarWithinCategory(
+    getFeaturedItems(items),
+    (item) => item.category,
+    (item) => getVisualGroup(item.id)
+  );
 }
 
 export function getItemsByCategory(
