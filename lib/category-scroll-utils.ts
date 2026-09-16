@@ -44,3 +44,46 @@ export function parseCategoryHash(hash: string): string | undefined {
   const slug = withoutHash.slice('cat-'.length);
   return slug.length > 0 ? slug : undefined;
 }
+
+/**
+ * Converts a category's horizontal position within the pinned track into
+ * the absolute page scroll position that shows it -- the core of
+ * FullMenuScroll's click-to-jump / deep-link jump.
+ *
+ * `probeOffsetLeft` is where the category's first card sits along the
+ * track; `distance` is the total horizontal distance the track travels
+ * over the pin's whole lifetime; `pinStart`/`pinEnd` are the pin's
+ * absolute page scroll boundaries (ScrollTrigger's `.start`/`.end`).
+ *
+ * Two things this deliberately protects against, both confirmed as real
+ * bugs rather than theoretical ones:
+ *
+ * - `probeOffsetLeft` isn't clamped to `[0, distance]` before use. A
+ *   category near the end of the track can have an offset greater than
+ *   `distance` (there isn't enough remaining track after it to align it
+ *   to the viewport's left edge without over-scrolling past the last
+ *   card), and one at/before the very start can't go below 0 either.
+ *   Progress is clamped to 0..1 either way, so the result is always a
+ *   point inside the pin -- just not necessarily with that category's
+ *   card flush against the left edge, which is an inherent limit of
+ *   "align to the left edge" for cards near either end of the track, not
+ *   a bug to route around.
+ *
+ * - The result never equals `pinEnd` itself. That exact boundary is where
+ *   GSAP begins releasing the pin, so landing there -- which is exactly
+ *   what jumping to the LAST category always tends toward, since its
+ *   progress is closest to 1 -- shows the track's un-scrubbed resting
+ *   state instead of that category, instead of the category itself. The
+ *   1px pulled back stays comfortably inside the pinned range at any
+ *   real-world section height and is not a perceptible landing offset.
+ */
+export function categoryScrollTarget(
+  probeOffsetLeft: number,
+  distance: number,
+  pinStart: number,
+  pinEnd: number
+): number {
+  const progress = distance > 0 ? Math.min(1, Math.max(0, probeOffsetLeft / distance)) : 0;
+  const raw = pinStart + (pinEnd - pinStart) * progress;
+  return Math.min(raw, pinEnd - 1);
+}

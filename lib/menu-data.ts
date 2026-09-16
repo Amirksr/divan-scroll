@@ -1265,6 +1265,30 @@ export function getFeaturedItemsInDisplayOrder(items: MenuItem[] = MENU_ITEMS): 
   );
 }
 
+/**
+ * The full menu (every item, grouped by category in the site's editorial
+ * category order) with lookalike photography spread apart inside each
+ * category's existing slots -- the same treatment as
+ * getFeaturedItemsInDisplayOrder, applied here to the complete menu rather
+ * than just the featured subset. Several categories have a dominant
+ * shared photo template covering more than half their items (every
+ * khoresh in "brunch", most of "pastry", most of "tea", most of "cold"),
+ * so full separation isn't always mathematically possible there -- see
+ * spaceOutSimilarWithinCategory's docs -- but this still spreads each
+ * category as evenly as its slot count allows.
+ */
+export function getMenuItemsInDisplayOrder(
+  categories: readonly { slug: MenuCategory }[],
+  items: MenuItem[] = MENU_ITEMS
+): MenuItem[] {
+  const rawItems = categories.flatMap((cat) => items.filter((item) => item.category === cat.slug));
+  return spaceOutSimilarWithinCategory(
+    rawItems,
+    (item) => item.category,
+    (item) => getVisualGroup(item.id)
+  );
+}
+
 export function getItemsByCategory(
   items: MenuItem[] = MENU_ITEMS
 ): Record<MenuCategory, MenuItem[]> {

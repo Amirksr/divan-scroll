@@ -122,15 +122,36 @@ describe('getFeaturedItemsInDisplayOrder', () => {
     expect(after.map((i) => i.category)).toEqual(before.map((i) => i.category));
   });
 
-  it('leaves no two lookalike cards adjacent', () => {
-    // Deliberately does NOT also assert that the raw MENU_ITEMS order
-    // still clashes. It did when this was written (six pairs: the two
-    // kababs, the khoresh trio, ferni/komaj, cortado/cappuccino and the
-    // two plated desserts), but that's a property of editorial data that
-    // may legitimately change -- asserting it would make this suite fail
-    // for a reason that isn't a bug. The synthetic cases above already
-    // prove the reorder actually separates things.
-    expect(adjacentClashes(after, (i) => getVisualGroup(i.id))).toBe(0);
+  it('separates every pair in a category where the dominant group is a minority', () => {
+    // Not a blanket "zero clashes" assertion: pastry's 3 featured items
+    // (baklava, tiramisu, chocolate-lava-cake) are ALL the same visual
+    // group (cafe-table-pastry) with nothing else in that category to
+    // interleave with, so at least one adjacent pair there is
+    // mathematically unavoidable -- see spaceOutSimilarWithinCategory's
+    // docs. This checks the categories where separation actually is
+    // possible, which is the meaningful invariant to hold as the menu
+    // data (and which items are featured) continues to change over time.
+    const byCategory = new Map<string, ReturnType<typeof getFeaturedItems>>();
+    for (const item of after) {
+      const list = byCategory.get(item.category) ?? [];
+      list.push(item);
+      byCategory.set(item.category, list);
+    }
+
+    for (const [category, list] of byCategory) {
+      const counts = new Map<string, number>();
+      for (const item of list) {
+        const g = getVisualGroup(item.id);
+        if (g) counts.set(g, (counts.get(g) ?? 0) + 1);
+      }
+      const maxGroupSize = Math.max(0, ...counts.values());
+      if (maxGroupSize > list.length / 2) continue; // can't be fully separated -- skip
+
+      expect([category, adjacentClashes(list, (i) => getVisualGroup(i.id))]).toEqual([
+        category,
+        0,
+      ]);
+    }
   });
 });
 

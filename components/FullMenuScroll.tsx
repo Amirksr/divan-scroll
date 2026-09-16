@@ -4,10 +4,10 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { MENU_ITEMS, formatToman, type MenuItem } from '@/lib/menu-data';
+import { getMenuItemsInDisplayOrder, formatToman, type MenuItem } from '@/lib/menu-data';
 import { CATEGORY_META, getOrderedAvailableCategories, type CategorySlug } from '@/lib/categories-data';
 import { getHorizontalScrollDistance, getCachedByWidth, type WidthCachedValue } from '@/lib/scroll-utils';
-import { pickActiveCategory, parseCategoryHash, type CategoryProbe } from '@/lib/category-scroll-utils';
+import { pickActiveCategory, parseCategoryHash, categoryScrollTarget, type CategoryProbe } from '@/lib/category-scroll-utils';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useIsomorphicLayoutEffect } from '@/hooks/useIsomorphicLayoutEffect';
 import { lenisInstance } from '@/lib/lenis-instance';
@@ -17,9 +17,15 @@ import { translate, type Locale, type Messages } from '@/lib/i18n';
 gsap.registerPlugin(ScrollTrigger);
 
 const availableCategories = getOrderedAvailableCategories();
-const items = availableCategories.flatMap((cat) =>
-  MENU_ITEMS.filter((item) => item.category === cat.slug)
-);
+// Same fix as the featured strip (lib/menu-data.ts getFeaturedItemsInDisplayOrder),
+// applied to the full menu: several groups of items share near-identical
+// photography (every khoresh, most of the tea and cold-drink photoshoots,
+// most of the original pastry photoshoot -- see lib/visual-groups.ts), and
+// with 6-10 lookalikes in a single category that read as repeats if left
+// in their original order. Only permutes within each category's existing
+// span of the track, so category boundaries and their left-to-right order
+// are unaffected.
+const items = getMenuItemsInDisplayOrder(availableCategories);
 
 export default function FullMenuScroll({ locale, dict }: { locale: Locale; dict: Messages }) {
   const t = (key: string) => translate(dict, key);
@@ -202,12 +208,30 @@ export default function FullMenuScroll({ locale, dict }: { locale: Locale; dict:
       return;
     }
 
+    // Force a fresh measurement right before every jump, rather than
+    // trusting whatever getDistance()'s width-keyed cache and the pin's
+    // last-known start/end already hold.
+    //
+    // That cache exists to stop the pin's end point from wobbling
+    // *mid-scrub* (see lib/scroll-utils.ts) -- it is deliberately NOT
+    // revalidated against the live DOM on every read. A discrete click has
+    // no scrub to protect from wobble, so reusing a value computed at some
+    // earlier, possibly-different moment is pure risk here, not a
+    // deliberate tradeoff. Confirmed real: the deep-link effect forces one
+    // early refresh right after mount (before layout has necessarily
+    // settled -- the intro paragraph's line count, and so this section's
+    // start offset, can still shift as the locale's web font finishes
+    // swapping in), which pins st.start/st.end to that moment. Every
+    // later click reused those same, now-stale numbers with no further
+    // refresh ever forcing a correction -- consistently off by however
+    // much the layout drifted after that first refresh, which is what
+    // made every tab click *after* the first one land one category short.
+    ScrollTrigger.refresh();
     const distance = getDistance();
     if (distance <= 0) return;
 
-    const progress = Math.min(1, Math.max(0, probe.offsetLeft / distance));
     const st = scrollTriggerRef.current;
-    const targetY = st.start + (st.end - st.start) * progress;
+    const targetY = categoryScrollTarget(probe.offsetLeft, distance, st.start, st.end);
 
     // Lenis owns scroll state once active -- a raw window.scrollTo here
     // would fight its internal target/velocity and jank or snap back.
@@ -264,7 +288,9 @@ export default function FullMenuScroll({ locale, dict }: { locale: Locale; dict:
 
     let secondFrame = 0;
     const firstFrame = requestAnimationFrame(() => {
-      ScrollTrigger.refresh();
+      // Just the settle delay now -- jumpToCategory always forces its own
+      // ScrollTrigger.refresh() immediately before computing where to
+      // land, so refreshing again here would just be redundant work.
       secondFrame = requestAnimationFrame(() => {
         didDeepLinkRef.current = true;
         jumpToCategoryRef.current(slug as CategorySlug, { immediate: true });
