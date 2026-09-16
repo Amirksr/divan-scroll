@@ -140,6 +140,31 @@ export default function FullMenuScroll({ locale, dict }: { locale: Locale; dict:
       });
 
       scrollTriggerRef.current = tween.scrollTrigger ?? null;
+
+      // One settling correction, not a standing habit: `st.start` is
+      // measured from the live DOM at creation time above, which can
+      // still be mid-reflow if the web font swaps in after this effect
+      // runs (menu-page-intro's line count -- and so this section's
+      // start offset -- shifts when that happens). Calling
+      // ScrollTrigger.refresh() again once fonts have actually settled
+      // corrects that permanently. This does NOT belong in
+      // jumpToCategory: refresh() re-evaluates every functional
+      // ScrollTrigger value including this trigger's own `end`/`x`
+      // (invalidateOnRefresh), and doing that while a Lenis-driven pin is
+      // actively engaged is exactly the "footer/card snap right as the
+      // pin releases" class of bug the width-keyed distance cache above
+      // already exists to guard against -- confirmed by reintroducing it
+      // here once and seeing every category jump (not just the
+      // originally-reported last one) start overshooting again. Guarding
+      // on `isActive` means this settle-correction can only ever fire
+      // before the reader has scrolled into the pin at all, never mid-use.
+      document.fonts?.ready
+        .then(() => {
+          if (!scrollTriggerRef.current?.isActive) {
+            ScrollTrigger.refresh();
+          }
+        })
+        .catch(() => {});
     }, sectionRef);
 
     return () => {
@@ -208,25 +233,18 @@ export default function FullMenuScroll({ locale, dict }: { locale: Locale; dict:
       return;
     }
 
-    // Force a fresh measurement right before every jump, rather than
-    // trusting whatever getDistance()'s width-keyed cache and the pin's
-    // last-known start/end already hold.
-    //
-    // That cache exists to stop the pin's end point from wobbling
-    // *mid-scrub* (see lib/scroll-utils.ts) -- it is deliberately NOT
-    // revalidated against the live DOM on every read. A discrete click has
-    // no scrub to protect from wobble, so reusing a value computed at some
-    // earlier, possibly-different moment is pure risk here, not a
-    // deliberate tradeoff. Confirmed real: the deep-link effect forces one
-    // early refresh right after mount (before layout has necessarily
-    // settled -- the intro paragraph's line count, and so this section's
-    // start offset, can still shift as the locale's web font finishes
-    // swapping in), which pins st.start/st.end to that moment. Every
-    // later click reused those same, now-stale numbers with no further
-    // refresh ever forcing a correction -- consistently off by however
-    // much the layout drifted after that first refresh, which is what
-    // made every tab click *after* the first one land one category short.
-    ScrollTrigger.refresh();
+    // Fresh measurement, but NOT via ScrollTrigger.refresh(): that
+    // re-evaluates every functional ScrollTrigger value including this
+    // trigger's own `end`/`x` (invalidateOnRefresh), and doing that while
+    // the pin is actively engaged is exactly the "footer/card snap right
+    // as the pin releases" class of bug the distance cache above already
+    // exists to guard against -- confirmed by trying it and seeing every
+    // category jump start overshooting, not just the one case it was
+    // meant to fix. The one genuine staleness risk (`st.start` drifting
+    // if a web font swap reflows the layout above this section) is
+    // corrected once, safely, in the layout effect above, gated on
+    // `document.fonts.ready` AND on the pin not yet being active -- by
+    // the time any click can happen here, that has already run.
     const distance = getDistance();
     if (distance <= 0) return;
 
@@ -267,9 +285,14 @@ export default function FullMenuScroll({ locale, dict }: { locale: Locale; dict:
   // exactly what was reported. Drive the same jump the tab click does.
   //
   // Runs as a plain effect (not layout) so the pin ScrollTrigger set up in
-  // the layout effect above already exists, then waits a frame and forces
-  // a refresh first: the card images are still settling on first paint,
-  // and jumping off a stale pin distance lands at the wrong offset.
+  // the layout effect above already exists. Waits for the web font to
+  // finish swapping in (menu-page-intro's line count, and so this
+  // section's start offset, can still shift as that happens) AND two
+  // frames for images to settle, THEN refreshes once before jumping.
+  // That refresh is safe here specifically because it's the very first
+  // possible interaction -- nothing is pinned yet for it to disrupt, unlike
+  // calling it from jumpToCategory on every later click (see the comment
+  // there for what that regressed into).
   const didDeepLinkRef = useRef(false);
   useEffect(() => {
     // Once per mount only, and the flag is set when the jump actually
@@ -286,18 +309,25 @@ export default function FullMenuScroll({ locale, dict }: { locale: Locale; dict:
     if (!slug) return;
     if (!availableCategories.some((c) => c.slug === slug)) return;
 
+    let cancelled = false;
+    let firstFrame = 0;
     let secondFrame = 0;
-    const firstFrame = requestAnimationFrame(() => {
-      // Just the settle delay now -- jumpToCategory always forces its own
-      // ScrollTrigger.refresh() immediately before computing where to
-      // land, so refreshing again here would just be redundant work.
-      secondFrame = requestAnimationFrame(() => {
-        didDeepLinkRef.current = true;
-        jumpToCategoryRef.current(slug as CategorySlug, { immediate: true });
+
+    const settle = document.fonts?.ready ?? Promise.resolve();
+    settle.then(() => {
+      if (cancelled) return;
+      firstFrame = requestAnimationFrame(() => {
+        secondFrame = requestAnimationFrame(() => {
+          if (cancelled) return;
+          ScrollTrigger.refresh();
+          didDeepLinkRef.current = true;
+          jumpToCategoryRef.current(slug as CategorySlug, { immediate: true });
+        });
       });
     });
 
     return () => {
+      cancelled = true;
       cancelAnimationFrame(firstFrame);
       cancelAnimationFrame(secondFrame);
     };
