@@ -1,0 +1,22 @@
+# Without this file, line endings for every text file depend entirely on
+# each contributor's local `core.autocrlf` setting -- Windows Git's common
+# default (core.autocrlf=true) checks these out as CRLF. That's invisible
+# for most editing, but broke __tests__/full-menu-scroll-refresh-safety.test.ts
+# outright: it reads components/FullMenuScroll.tsx as a raw string and
+# looks for exact substrings containing a literal "\n", which a CRLF file
+# never matches (confirmed by reproducing a CRLF checkout locally -- it
+# fails all 4 of that file's marker-dependent tests). Forcing LF here makes
+# every checkout byte-identical regardless of OS or git config, which is
+# what that test (and any future one doing the same kind of raw source-text
+# matching) actually needs to be reliable.
+* text=auto eol=lf
+
+# Binary assets -- never text-convert these regardless of extension.
+*.mp4 binary
+*.webp binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.woff binary
+*.woff2 binary

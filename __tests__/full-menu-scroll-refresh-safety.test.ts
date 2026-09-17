@@ -44,7 +44,15 @@ describe('FullMenuScroll jump-to-category math is self-consistent and refresh-sa
   );
   // Line comments only -- this file has no /* */ blocks, and a naive
   // block-comment stripper risks eating real code if that ever changes.
+  // \r\n is also normalized to \n here: this file has no enforced line
+  // ending (no .gitattributes existed for it before this change), so a
+  // checkout via Windows Git with the common core.autocrlf=true default
+  // has CRLF on disk -- and every marker/body below is written against
+  // literal \n, which a raw CRLF file would never match. Confirmed by
+  // reproducing a CRLF checkout locally: it fails all 4 of this file's
+  // marker-dependent tests exactly like this.
   const source = rawSource
+    .replace(/\r\n/g, '\n')
     .split('\n')
     .map((line) => line.replace(/\/\/.*$/, ''))
     .join('\n');
