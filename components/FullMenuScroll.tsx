@@ -167,7 +167,34 @@ export default function FullMenuScroll({ locale, dict }: { locale: Locale; dict:
         .catch(() => {});
     }, sectionRef);
 
+    // Corrects st.start/st.end after a genuine, lasting viewport resize
+    // (rotating a phone, resizing a browser window). getDistance()'s own
+    // width-keyed cache already updates itself immediately for ANY width
+    // change, including transient ones a resize event never fires for
+    // (observed live: a scrollbar or dynamic mobile toolbar changing
+    // window.innerWidth mid-session with no resize the user would notice)
+    // -- jumpToCategory derives its distance from st.end/st.start directly
+    // rather than that cache specifically so those transient blips can't
+    // desync the two. This listener exists for the separate, slower-moving
+    // case: an ACTUAL resize eventually needs st.start/st.end themselves
+    // corrected too, once it's safe to do so. Debounced, and the same
+    // isActive guard as the settle correction above -- never fires while
+    // the reader is mid-scroll through the pin, only once things are at
+    // rest.
+    let resizeTimer = 0;
+    const onResize = () => {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(() => {
+        if (!scrollTriggerRef.current?.isActive) {
+          ScrollTrigger.refresh();
+        }
+      }, 200);
+    };
+    window.addEventListener('resize', onResize);
+
     return () => {
+      window.clearTimeout(resizeTimer);
+      window.removeEventListener('resize', onResize);
       scrollTriggerRef.current = null;
       // Discard the cached distance too -- a stale width-keyed entry from
       // before this effect re-ran (e.g. prefers-reduced-motion toggling
@@ -233,22 +260,39 @@ export default function FullMenuScroll({ locale, dict }: { locale: Locale; dict:
       return;
     }
 
-    // Fresh measurement, but NOT via ScrollTrigger.refresh(): that
-    // re-evaluates every functional ScrollTrigger value including this
-    // trigger's own `end`/`x` (invalidateOnRefresh), and doing that while
-    // the pin is actively engaged is exactly the "footer/card snap right
-    // as the pin releases" class of bug the distance cache above already
-    // exists to guard against -- confirmed by trying it and seeing every
-    // category jump start overshooting, not just the one case it was
-    // meant to fix. The one genuine staleness risk (`st.start` drifting
-    // if a web font swap reflows the layout above this section) is
-    // corrected once, safely, in the layout effect above, gated on
-    // `document.fonts.ready` AND on the pin not yet being active -- by
-    // the time any click can happen here, that has already run.
-    const distance = getDistance();
+    // Distance for the progress fraction below comes from st.end - st.start,
+    // NOT a fresh getDistance() call. Confirmed via an instrumented headless
+    // run (devtools console + a temporary debug hook) that these two can
+    // silently diverge: getDistance()'s cache is keyed on window.innerWidth
+    // and updates itself the instant that width changes for ANY reason
+    // (observed live -- a scrollbar/dynamic-toolbar-driven viewport width
+    // change mid-session, with no resize the user would even notice), but
+    // st.start/st.end only change when ScrollTrigger.refresh() actually
+    // runs -- which, per the comment below, must NOT happen from here. Once
+    // those two diverge, `probe.offsetLeft / distance` and `st.start +
+    // (st.end - st.start) * progress` stop agreeing with each other, and
+    // every jump after the divergence lands further off than the last --
+    // exactly the "every category is now wrong, worse each time" symptom
+    // that was reported. Deriving distance from the SAME st.end/st.start
+    // this function already uses for the target range guarantees the two
+    // can never disagree, regardless of what getDistance()'s independent
+    // cache is doing.
+    //
+    // ScrollTrigger.refresh() is deliberately NOT called here to correct
+    // st.start/st.end either: refresh() re-evaluates every functional
+    // ScrollTrigger value including this trigger's own `end`/`x`
+    // (invalidateOnRefresh), and doing that while the pin is actively
+    // engaged is exactly the "footer/card snap right as the pin releases"
+    // class of bug the distance cache above already exists to guard
+    // against -- confirmed by trying it and seeing every category jump
+    // start overshooting, not just the one case it was meant to fix. A
+    // resize listener (see the layout effect above) handles correcting
+    // st.start/st.end for a genuine, lasting viewport resize instead, using
+    // the same isActive-guarded refresh as the initial settle correction.
+    const st = scrollTriggerRef.current;
+    const distance = st.end - st.start;
     if (distance <= 0) return;
 
-    const st = scrollTriggerRef.current;
     const targetY = categoryScrollTarget(probe.offsetLeft, distance, st.start, st.end);
 
     // Lenis owns scroll state once active -- a raw window.scrollTo here
