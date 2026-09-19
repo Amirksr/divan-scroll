@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 import { notFound } from 'next/navigation';
 import { Newsreader, Vazirmatn, Inter, JetBrains_Mono } from 'next/font/google';
@@ -46,6 +46,28 @@ const jetbrainsMono = JetBrains_Mono({
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
+
+/**
+ * Without this, the page had NO <meta name="viewport"> tag at all --
+ * Next.js's Metadata API only emits one if a `viewport` export tells it
+ * to, and this layout never had one. A mobile browser with no viewport
+ * tag falls back to laying the page out at its own desktop-simulation
+ * width (historically ~980px, and confirmed live in headless Chromium's
+ * mobile emulation here as well) and then zooming the whole thing out to
+ * fit the physical screen, rather than rendering at the device's actual
+ * CSS pixel width. Every `vw`-based measurement in this app (.h-card's
+ * width, .h-viewport's side padding, and so on) and every JS scroll
+ * calculation that reads window.innerWidth or getBoundingClientRect()
+ * (FullMenuScroll's whole click-to-jump math) would then be computed
+ * against that wrong, wide layout viewport instead of the real one --
+ * which is a far more fundamental explanation for "this only breaks on
+ * an actual phone" than anything in the scroll logic itself, and was
+ * never ruled out until this was found missing.
+ */
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+};
 
 export async function generateMetadata({
   params,
