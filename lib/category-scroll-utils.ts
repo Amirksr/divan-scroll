@@ -55,7 +55,7 @@ export function parseCategoryHash(hash: string): string | undefined {
  * over the pin's whole lifetime; `pinStart`/`pinEnd` are the pin's
  * absolute page scroll boundaries (ScrollTrigger's `.start`/`.end`).
  *
- * Two things this deliberately protects against, both confirmed as real
+ * Three things this deliberately protects against, all confirmed as real
  * bugs rather than theoretical ones:
  *
  * - `probeOffsetLeft` isn't clamped to `[0, distance]` before use. A
@@ -69,13 +69,25 @@ export function parseCategoryHash(hash: string): string | undefined {
  *   "align to the left edge" for cards near either end of the track, not
  *   a bug to route around.
  *
- * - The result never equals `pinEnd` itself. That exact boundary is where
- *   GSAP begins releasing the pin, so landing there -- which is exactly
- *   what jumping to the LAST category always tends toward, since its
- *   progress is closest to 1 -- shows the track's un-scrubbed resting
- *   state instead of that category, instead of the category itself. The
- *   1px pulled back stays comfortably inside the pinned range at any
- *   real-world section height and is not a perceptible landing offset.
+ * - The result never equals `pinEnd`. That exact boundary is where GSAP
+ *   begins releasing the pin, so landing there -- which is exactly what
+ *   jumping to the LAST category always tends toward, since its progress
+ *   is closest to 1 -- shows the track's un-scrubbed resting state
+ *   instead of that category.
+ *
+ * - The result never equals `pinStart` either, for the mirror-image
+ *   reason: that's the boundary where the pin ENGAGES. Jumping to the
+ *   FIRST category always computes progress exactly 0, so its raw target
+ *   is exactly `pinStart` -- landing precisely on the engage boundary is
+ *   the same class of ambiguous, GSAP-version- and browser-dependent
+ *   territory as landing precisely on the release boundary, just at the
+ *   other end. Kept as a live, load-bearing case rather than an
+ *   after-the-fact guess: it is what continued to reproduce, on an
+ *   actual device, after the pinEnd-only version of this fix shipped.
+ *
+ * Both boundary offsets are 1px, comfortably inside the pinned range at
+ * any of this section's real sizes and imperceptible as a landing
+ * position.
  */
 export function categoryScrollTarget(
   probeOffsetLeft: number,
@@ -85,5 +97,5 @@ export function categoryScrollTarget(
 ): number {
   const progress = distance > 0 ? Math.min(1, Math.max(0, probeOffsetLeft / distance)) : 0;
   const raw = pinStart + (pinEnd - pinStart) * progress;
-  return Math.min(raw, pinEnd - 1);
+  return Math.min(Math.max(raw, pinStart + 1), pinEnd - 1);
 }

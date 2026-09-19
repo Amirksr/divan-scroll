@@ -51,8 +51,22 @@ describe('categoryScrollTarget', () => {
   const pinEnd = 16000;
   const distance = 15000;
 
-  it('maps offset 0 to the pin start', () => {
-    expect(categoryScrollTarget(0, distance, pinStart, pinEnd)).toBe(pinStart);
+  // Regression test for a real bug: jumping to the FIRST category
+  // (Coffee & Espresso) landed scrolled exactly to the pin's engage
+  // boundary, which is the same class of ambiguous territory as landing
+  // exactly on the release boundary (see the pinEnd test below) -- this
+  // is what continued to reproduce, on an actual device, after only the
+  // pinEnd side of this had been fixed.
+  it('never returns exactly pinStart, even when offset is 0', () => {
+    const target = categoryScrollTarget(0, distance, pinStart, pinEnd);
+    expect(target).toBeGreaterThan(pinStart);
+    expect(target - pinStart).toBeLessThanOrEqual(1);
+  });
+
+  it('never returns exactly pinStart even when offset is negative', () => {
+    const target = categoryScrollTarget(-500, distance, pinStart, pinEnd);
+    expect(target).toBeGreaterThan(pinStart);
+    expect(target - pinStart).toBeLessThanOrEqual(1);
   });
 
   it('maps a mid-track offset to the proportional point between start and end', () => {
@@ -84,13 +98,15 @@ describe('categoryScrollTarget', () => {
     expect(pinEnd - target).toBeLessThanOrEqual(1);
   });
 
-  it('clamps a negative offset to the pin start rather than undershooting past it', () => {
-    expect(categoryScrollTarget(-500, distance, pinStart, pinEnd)).toBe(pinStart);
+  it('clamps a negative offset toward the pin start rather than undershooting past it', () => {
+    const target = categoryScrollTarget(-500, distance, pinStart, pinEnd);
+    expect(target).toBeGreaterThanOrEqual(pinStart);
+    expect(target - pinStart).toBeLessThanOrEqual(1);
   });
 
-  it('returns pinStart when distance is 0 (nothing to scroll)', () => {
-    expect(categoryScrollTarget(0, 0, pinStart, pinEnd)).toBe(pinStart);
-    expect(categoryScrollTarget(100, 0, pinStart, pinEnd)).toBe(pinStart);
+  it('stays inside (pinStart, pinEnd) when distance is 0 (nothing to scroll)', () => {
+    expect(categoryScrollTarget(0, 0, pinStart, pinEnd)).toBe(pinStart + 1);
+    expect(categoryScrollTarget(100, 0, pinStart, pinEnd)).toBe(pinStart + 1);
   });
 
   it('stays correct for a very short pin range (small distance)', () => {
